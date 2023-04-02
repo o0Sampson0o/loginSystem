@@ -56,7 +56,7 @@ const route = {
             res.end();
         });
     },
-    "/signup": function (query, res) {
+    "/signup/index.html": function (query, res) {
         res.writeHead(200, { "Content-Type": "text/html" });
         fs.readFile("./signup/index.html", function (err, html) {
             if (err) throw err;

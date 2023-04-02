@@ -49,7 +49,7 @@ function submitForm(event) {
         return httpResponse.text();
     })
     .then(text => {
-        if (text === "success") window.location.replace("http://localhost:8080/login");
+        if (text === "success") window.location.href ="/login/index.html";
         username.classList.add('error');
         usernameErrorMessage.innerText = "username already exist";
     })
