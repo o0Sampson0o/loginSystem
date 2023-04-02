@@ -5,7 +5,7 @@ function submitForm(event) {
     const message = document.getElementById("message");
     const username = document.getElementById("username");
     const password = document.getElementById("password");
-    const repeatPassword = document.getElementById("repeatPassword");
+    const confirmPassword = document.getElementById("confirmPassword");
     const bodyData = {username: username.value, password: password.value};
     let validationMessage;
     validationMessage = validateUsername(username.value);
@@ -13,7 +13,7 @@ function submitForm(event) {
         message.innerText = validationMessage;
         return;
     }
-    validationMessage = validatePassword(password.value, repeatPassword.value);
+    validationMessage = validatePassword(password.value, confirmPassword.value);
     if (validationMessage !== 'ok') {
         message.innerText = validationMessage;
         return;
@@ -35,7 +35,7 @@ function submitForm(event) {
         if (text === "success") window.location.replace("http://localhost:8080/login");
     })
     .catch(error => {
-        console.log(`Error: ${error.message}`);
+        console.error(`Error: ${error.message}`);
     });
 }
 
@@ -51,12 +51,12 @@ function validateUsername(username) {
     return 'ok';
 }
 
-function validatePassword(password, repeatPassword) {
+function validatePassword(password, confirmPassword) {
     if (password.length === 0) {
         return "password cannot be empty";
     } else if (password.length < 8) {
         return "password needs to be at least 8 character";
-    } else if (repeatPassword !== password) {
+    } else if (confirmPassword !== password) {
         return "the two passwords does not match";
     }
     return 'ok';

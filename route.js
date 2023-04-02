@@ -21,7 +21,7 @@ sqlConnection.connect(function (err) {
 
 const route = {
     "/": function (query, res) {
-        res.writeHead(308, { Location: "./login" });
+        res.writeHead(301, { Location: "./login" });
         res.end();
     },
     "/login": function (query, res) {

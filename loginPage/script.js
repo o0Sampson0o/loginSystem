@@ -13,17 +13,17 @@ function submitForm(event) {
         },
         body: JSON.stringify(bodyData)
     })
-        .then(httpResponse => {
-            if (!httpResponse.ok) throw new Error(`HTTP error, status = ${response.status}`);
-            return httpResponse.text();
-        })
-        .then(text => {
-            const message = document.getElementById("message");
-            message.innerText = text;
-        })
-        .catch(error => {
-            console.log(`Error: ${error.message}`);
-        });
+    .then(httpResponse => {
+        if (!httpResponse.ok) throw new Error(`HTTP error, status = ${response.status}`);
+        return httpResponse.text();
+    })
+    .then(text => {
+        const message = document.getElementById("message");
+        message.innerText = text;
+    })
+    .catch(error => {
+        console.error(`Error: ${error.message}`);
+    });
 }
 
 window.onload = () => {
