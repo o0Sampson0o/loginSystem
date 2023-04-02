@@ -40,6 +40,22 @@ const route = {
             res.end();
         });
     },
+    "/login/style.css": function (query, res) {
+        res.writeHead(200, { "Content-Type": "text/css" });
+        fs.readFile("./loginPage/style.css", function (err, css) {
+            if (err) throw err;
+            res.write(css);
+            res.end();
+        });
+    },
+    "/login/images/background.jpg": function (query, res) {
+        res.writeHead(200, { "Content-Type": "application/javascript" });
+        fs.readFile("./loginPage/images/background (2).jpg", function (err, img) {
+            if (err) throw err;
+            res.write(img);
+            res.end();
+        });
+    },
     "/signup": function (query, res) {
         res.writeHead(200, { "Content-Type": "text/html" });
         fs.readFile("./signupPage/index.html", function (err, html) {
@@ -53,6 +69,22 @@ const route = {
         fs.readFile("./signupPage/script.js", function (err, js) {
             if (err) throw err;
             res.write(js);
+            res.end();
+        });
+    },
+    "/signup/style.css": function (query, res) {
+        res.writeHead(200, { "Content-Type": "text/css" });
+        fs.readFile("./signupPage/style.css", function (err, css) {
+            if (err) throw err;
+            res.write(css);
+            res.end();
+        });
+    },
+    "/signup/images/background.jpg": function (query, res) {
+        res.writeHead(200, { "Content-Type": "application/javascript" });
+        fs.readFile("./signupPage/images/background.jpg", function (err, img) {
+            if (err) throw err;
+            res.write(img);
             res.end();
         });
     },
