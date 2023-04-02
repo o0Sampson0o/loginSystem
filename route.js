@@ -21,12 +21,12 @@ sqlConnection.connect(function (err) {
 
 const route = {
     "/": function (query, res) {
-        res.writeHead(301, { Location: "./login" });
+        res.writeHead(301, { Location: "./login/index.html" });
         res.end();
     },
-    "/login": function (query, res) {
+    "/login/index.html": function (query, res) {
         res.writeHead(200, { "Content-Type": "text/html" });
-        fs.readFile("./loginPage/index.html", function (err, html) {
+        fs.readFile("./login/index.html", function (err, html) {
             if (err) throw err;
             res.write(html);
             res.end();
@@ -34,7 +34,7 @@ const route = {
     },
     "/login/script.js": function (query, res) {
         res.writeHead(200, { "Content-Type": "application/javascript" });
-        fs.readFile("./loginPage/script.js", function (err, js) {
+        fs.readFile("./login/script.js", function (err, js) {
             if (err) throw err;
             res.write(js);
             res.end();
@@ -42,7 +42,7 @@ const route = {
     },
     "/login/style.css": function (query, res) {
         res.writeHead(200, { "Content-Type": "text/css" });
-        fs.readFile("./loginPage/style.css", function (err, css) {
+        fs.readFile("./login/style.css", function (err, css) {
             if (err) throw err;
             res.write(css);
             res.end();
@@ -50,7 +50,7 @@ const route = {
     },
     "/login/images/background.jpg": function (query, res) {
         res.writeHead(200, { "Content-Type": "application/javascript" });
-        fs.readFile("./loginPage/images/background.jpg", function (err, img) {
+        fs.readFile("./login/images/background.jpg", function (err, img) {
             if (err) throw err;
             res.write(img);
             res.end();
@@ -58,7 +58,7 @@ const route = {
     },
     "/signup": function (query, res) {
         res.writeHead(200, { "Content-Type": "text/html" });
-        fs.readFile("./signupPage/index.html", function (err, html) {
+        fs.readFile("./signup/index.html", function (err, html) {
             if (err) throw err;
             res.write(html);
             res.end();
@@ -66,7 +66,7 @@ const route = {
     },
     "/signup/script.js": function (query, res) {
         res.writeHead(200, { "Content-Type": "application/javascript" });
-        fs.readFile("./signupPage/script.js", function (err, js) {
+        fs.readFile("./signup/script.js", function (err, js) {
             if (err) throw err;
             res.write(js);
             res.end();
@@ -74,7 +74,7 @@ const route = {
     },
     "/signup/style.css": function (query, res) {
         res.writeHead(200, { "Content-Type": "text/css" });
-        fs.readFile("./signupPage/style.css", function (err, css) {
+        fs.readFile("./signup/style.css", function (err, css) {
             if (err) throw err;
             res.write(css);
             res.end();
@@ -82,7 +82,7 @@ const route = {
     },
     "/signup/images/background.jpg": function (query, res) {
         res.writeHead(200, { "Content-Type": "application/javascript" });
-        fs.readFile("./signupPage/images/background.jpg", function (err, img) {
+        fs.readFile("./signup/images/background.jpg", function (err, img) {
             if (err) throw err;
             res.write(img);
             res.end();

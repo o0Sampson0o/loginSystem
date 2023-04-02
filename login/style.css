@@ -27,7 +27,7 @@ body {
     display: block;
     background: rgba(0, 0, 0, .8);
     padding: auto; 
-    box-shadow: 0 0 30px 5px #fff;
+    box-shadow: 0 0 100px 0px #fff;
 }
 
 #title {
