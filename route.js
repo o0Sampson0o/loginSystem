@@ -40,6 +40,22 @@ const route = {
             res.end();
         });
     },
+    "/login/style.css": function (query, res) {
+        res.writeHead(200, { "Content-Type": "text/css" });
+        fs.readFile("./loginPage/style.css", function (err, css) {
+            if (err) throw err;
+            res.write(css);
+            res.end();
+        });
+    },
+    "/login/images/background.jpg": function (query, res) {
+        res.writeHead(200, { "Content-Type": "text/css" });
+        fs.readFile("./loginPage/images/background.jpg", function (err, img) {
+            if (err) throw err;
+            res.write(img);
+            res.end();
+        });
+    },
     "/signup": function (query, res) {
         res.writeHead(200, { "Content-Type": "text/html" });
         fs.readFile("./signupPage/index.html", function (err, html) {
@@ -56,9 +72,24 @@ const route = {
             res.end();
         });
     },
+    "/signup/style.css": function (query, res) {
+        res.writeHead(200, { "Content-Type": "text/css" });
+        fs.readFile("./signupPage/style.css", function (err, css) {
+            if (err) throw err;
+            res.write(css);
+            res.end();
+        });
+    },
+    "/signup/images/background.jpg": function (query, res) {
+        res.writeHead(200, { "Content-Type": "text/css" });
+        fs.readFile("./signupPage/images/background.jpg", function (err, img) {
+            if (err) throw err;
+            res.write(img);
+            res.end();
+        });
+    },
     "/signup/api": function (query, res) {
         var sql = `INSERT INTO users (username, password) VALUES ('${query.data.username}', '${query.data.password}')`;
-        console.log(sql);
         sqlConnection.query(sql, function (err, result) {
             if (err) {
                 if (err.code === "ER_DUP_ENTRY") {

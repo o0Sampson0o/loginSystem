@@ -2,20 +2,24 @@
 
 <html>
     <head>
-        <title>Signup</title>
+        <title>Login</title>
         <base href="./signup/">
-        <script src="script.js"></script>
+        <script src="./script.js"></script>
+        <link rel="stylesheet" href="./style.css" />
     </head>
     <body>
         <span id="message"></span>
-        <form id="form">
-            <label for="username">Username:</label><br />
-            <input type="text" name="username" id="username" /><br />
-            <label for="password">Password: </label><br />
-            <input type="password" name="password" id="password" /><br />
-            <label for="confirmPassword">Confirm Password: </label><br />
-            <input type="password" name="confirmPassword" id="confirmPassword" /><br />
-            <input type="submit" value="submit" />
-        </form>
+        <div id="login-form-container">
+            <form id="form">
+                <h1 id="title">Signup</h1>
+                <input type="text" name="username" id="username" placeholder="Enter Username" /><br />
+                <p class="errorMessage" id="username-error-message"></p>
+                <input type="password" name="password" id="password" placeholder="Enter Password" /><br />
+                <p class="errorMessage" id="password-error-message"></p>
+                <input type="password" name="confirm-password" id="confirm-password" placeholder="Comfirm Your Password" /><br />
+                <p class="errorMessage" id="confirm-password-error-message"></p>
+                <input type="submit" value="Sign Up" />
+            </form>
+        </div>
     </body>
 </html>
