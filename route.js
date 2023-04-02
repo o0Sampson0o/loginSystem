@@ -50,7 +50,7 @@ const route = {
     },
     "/login/images/background.jpg": function (query, res) {
         res.writeHead(200, { "Content-Type": "application/javascript" });
-        fs.readFile("./loginPage/images/background (2).jpg", function (err, img) {
+        fs.readFile("./loginPage/images/background.jpg", function (err, img) {
             if (err) throw err;
             res.write(img);
             res.end();

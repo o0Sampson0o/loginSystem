@@ -49,8 +49,9 @@ function submitForm(event) {
         return httpResponse.text();
     })
     .then(text => {
-        message.innerText = text;
         if (text === "success") window.location.replace("http://localhost:8080/login");
+        username.classList.add('error');
+        usernameErrorMessage.innerText = "username already exist";
     })
     .catch(error => {
         console.error(`Error: ${error.message}`);

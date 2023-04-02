@@ -43,7 +43,7 @@ input[type="password"], input[type="text"] {
     color: white;
     font-size: 20px;
     padding: 10px 20px;
-    margin: 10px auto;
+    margin: 5px auto;
     width: 80%;
     background: rgba(0, 0, 0, .9);
     height: 30px;
@@ -63,6 +63,7 @@ input[type="password"]:focus, input[type="text"]:focus {
 .errorMessage {
     color: red;
     height: 20px;
+    margin-bottom: 10px;
 }
 
 input[type="submit"], #signup-button {
