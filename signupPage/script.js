@@ -2,40 +2,22 @@
 
 function submitForm(event) {
     event.preventDefault();
+    const message = document.getElementById("message");
     const username = document.getElementById("username");
     const password = document.getElementById("password");
-    const confirmPassword = document.getElementById("confirm-password");
-    const usernameErrorMessage = document.getElementById("username-error-message");
-    const passwordErrorMessage = document.getElementById("password-error-message");
-    const confirmPasswordErrorMessage = document.getElementById("confirm-password-error-message");
+    const confirmPassword = document.getElementById("confirmPassword");
     const bodyData = {username: username.value, password: password.value};
     let validationMessage;
     validationMessage = validateUsername(username.value);
-    let isOk = true;
-    username.classList.remove('error');
-    password.classList.remove('error');
-    confirmPassword.classList.remove('error');
-    usernameErrorMessage.innerText = "";
-    passwordErrorMessage.innerText = "";
-    confirmPasswordErrorMessage.innerText = "";
     if (validationMessage !== 'ok') {
-        username.classList.add('error');
-        usernameErrorMessage.innerText = validationMessage;
-        isOk = false;
+        message.innerText = validationMessage;
+        return;
     }
-    validationMessage = validatePassword(password.value);
+    validationMessage = validatePassword(password.value, confirmPassword.value);
     if (validationMessage !== 'ok') {
-        password.classList.add('error');
-        passwordErrorMessage.innerText = validationMessage;
-        isOk = false;
+        message.innerText = validationMessage;
+        return;
     }
-    validationMessage = validateConfirmPassword(password.value, confirmPassword.value);
-    if (validationMessage !== 'ok') {
-        confirmPassword.classList.add('error');
-        confirmPasswordErrorMessage.innerText = validationMessage;
-        isOk = false;
-    }
-    if (!isOk) return;
     fetch(`http://localhost:8080/signup/api`, {
         method: "POST",
         cache: "no-cache",
@@ -69,18 +51,13 @@ function validateUsername(username) {
     return 'ok';
 }
 
-function validatePassword(password) {
+function validatePassword(password, confirmPassword) {
     if (password.length === 0) {
         return "password cannot be empty";
     } else if (password.length < 8) {
         return "password needs to be at least 8 character";
-    }
-    return 'ok';
-}
-
-function validateConfirmPassword(password, confirmPassword) {
-    if (confirmPassword !== password) {
-        return "passwords does not match";
+    } else if (confirmPassword !== password) {
+        return "the two passwords does not match";
     }
     return 'ok';
 }
