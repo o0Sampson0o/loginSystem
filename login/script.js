@@ -27,11 +27,13 @@ function submitForm(event) {
     }
     if (!isOk) return;
 
-    fetch(`http://localhost:8080/login/api`, {
+    fetch(`/login/api`, {
         method: "POST",
         cache: "no-cache",
+        mode: 'cors',
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            'Access-Control-Allow-Origin':'*'
         },
         body: JSON.stringify(bodyData)
     })
@@ -40,10 +42,9 @@ function submitForm(event) {
         return httpResponse.text();
     })
     .then(text => {
-        message.innerText = text;
         if (text != "Logged in.") {
             username.classList.add('error');
-            usernameErrorMessage.innerText = "username or password incorrect.";
+            usernameErrorMessage.innerText = text;
         } else {
             alert(text);
         }

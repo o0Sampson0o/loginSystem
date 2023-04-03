@@ -36,11 +36,13 @@ function submitForm(event) {
         isOk = false;
     }
     if (!isOk) return;
-    fetch(`http://localhost:8080/signup/api`, {
+    fetch(`/signup/api`, {
         method: "POST",
         cache: "no-cache",
+        mode: 'cors',
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            'Access-Control-Allow-Origin':'*'
         },
         body: JSON.stringify(bodyData)
     })
