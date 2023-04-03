@@ -12,20 +12,19 @@ const ngrok = require("ngrok");
 const functionalRoute = require("./functionalRoute");
 
 http.createServer(function (httpRequest, httpRespond) {
-    console.log(httpRequest.url);
     const urlObj = url.parse(httpRequest.url);
     const queryDestruct = urlObj.query?.split(/[&=]/);
     let queryObj = {};
 
-    httpRespond.setHeader('Access-Control-Allow-Origin', '*');
-	httpRespond.setHeader('Access-Control-Request-Method', '*');
-	httpRespond.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
-	httpRespond.setHeader('Access-Control-Allow-Headers', '*');
-	if ( httpRequest.method === 'OPTIONS' ) {
-		httpRespond.writeHead(200);
-		httpRespond.end();
-		return;
-	}
+    httpRespond.setHeader("Access-Control-Allow-Origin", "*");
+    httpRespond.setHeader("Access-Control-Request-Method", "*");
+    httpRespond.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
+    httpRespond.setHeader("Access-Control-Allow-Headers", "*");
+    if (httpRequest.method === "OPTIONS") {
+        httpRespond.writeHead(200);
+        httpRespond.end();
+        return;
+    }
     if (queryDestruct?.length) {
         for (let i = 0; i < queryDestruct.length; i += 2) {
             queryObj[queryDestruct[i]] = queryDestruct[i + 1];

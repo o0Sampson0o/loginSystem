@@ -2,7 +2,10 @@
 
 const mysql = require("mysql2");
 const { LOG, MODE } = require("./logger.js");
-require('dotenv').config();
+require("dotenv").config();
+
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 var sqlConnection = mysql.createConnection({
     host: "localhost",
@@ -10,59 +13,75 @@ var sqlConnection = mysql.createConnection({
     password: process.env.MYSQL_PASSWORD
 });
 
-sqlConnection.connect(function (err) {
-    if (err) throw err;
-    sqlConnection.query("use loginsystem", function (err, result) {
-        if (err) throw err;
+sqlConnection.connect(function (sqlConnectionErr) {
+    if (sqlConnectionErr) throw sqlConnectionErr;
+    sqlConnection.query("use loginsystem", function (useDataBaseSqlErr, useDataBaseSqlResult) {
+        if (useDataBaseSqlErr) throw useDataBaseSqlErr;
     });
     LOG(MODE.suc, "database name: loginsystem connected!");
 });
 
 const functionalRoute = {
-    "/": function (query, res) {
-        res.writeHead(301, { Location: "./login/" });
-        res.end();
+    "/": function (httpQuery, httpRes) {
+        httpRes.writeHead(301, { Location: "./login/" });
+        httpRes.end();
     },
-    "/signup/api": function (query, res) {
-        const sql = `INSERT INTO users (username, password) VALUES ('${query.data.username}', '${query.data.password}')`;
-        LOG(MODE.msg, `username: ${query.data.username}, password: ${query.data.password}`);
-        sqlConnection.query(sql, function (err, result) {
-            if (err) {
-                if (err.code === "ER_DUP_ENTRY") {
-                    res.writeHead(200, { "Content-Type": "text/html" });
-                    res.write("username already exist");
-                    LOG(MODE.war, `create error username ${query.data.username} already exist`);
-                } else {
-                    throw err;
-                }
-            } else {
-                res.writeHead(200, { "Content-Type": "text/html" });
-                res.write("success");
-                LOG(MODE.suc, `created new user with username:${query.data.username}, password: ${query.data.password}`);
-            }
-            res.end();
-        });
-    },
-    "/login/api": function (query, res) {
-        const sql = `SELECT * FROM users WHERE username='${query.data.username}' and password='${query.data.password}'`;
-        LOG(MODE.msg, `username: ${query.data.username}, password: ${query.data.password}`);
-        sqlConnection.query(sql, function (err, result) {
-            if (err) throw err;
-            else {
-                res.writeHead(200, { "Content-Type": "text/html" });
-                if (result.length !== 0) {
-                    LOG(MODE.suc, `user ${result[0].userid} logged in with username: ${result[0].username} and password: ${result[0].password}`);
-                    if (result[0].username !== query.data.username) {
-                        res.write("FUCK YOU.");
+    "/signup/api": function (httpQuery, httpRes) {
+        const username = httpQuery.data.username.replace(/[']/g, "''");
+        const password = httpQuery.data.password;
+        bcrypt
+            .genSalt(saltRounds)
+            .then(salt => bcrypt.hash(password, salt))
+            .then(hashedPassword => {
+                const sql = `INSERT INTO users (username, userLevel, hashedPassword) VALUES ('${username}', 0, '${hashedPassword}')`;
+                sqlConnection.query(sql, (sqlErr, sqlResult) => {
+                    httpRes.writeHead(200, { "Content-Type": "text/html" });
+                    if (sqlErr) {
+                        if (sqlErr.code === "ER_DUP_ENTRY") {
+                            httpRes.write("username already exist");
+                            LOG(MODE.war, `create error user '${username}' already exist`);
+                        } else {
+                            throw sqlErr;
+                        }
                     } else {
-                        res.write("Logged in.");
+                        httpRes.write("success");
+                        LOG(MODE.suc, `user '${username}' created`);
                     }
+                    httpRes.end();
+                });
+            })
+            .catch(err => {
+                throw err;
+            });
+    },
+    "/login/api": function (httpQuery, httpRes) {
+        const username = httpQuery.data.username.replace(/[']/g, "''");
+        const password = httpQuery.data.password;
+        const sql = `SELECT * FROM users WHERE username='${username}'`;
+        sqlConnection.query(sql, (sqlErr, sqlResult) => {
+            if (sqlErr) throw sqlErr;
+            else {
+                httpRes.writeHead(200, { "Content-Type": "text/html" });
+                if (sqlResult.length !== 0) {
+                    bcrypt
+                        .compare(password, sqlResult[0].hashedPassword)
+                        .then(bcryptResult => {
+                            if (bcryptResult) {
+                                httpRes.write("Logged in.");
+                                LOG(MODE.suc, `user ${sqlResult[0].username} logged in`);
+                            } else {
+                                httpRes.write("Username or password incorrect.");
+                                LOG(MODE.war, `username: ${username} login failed`);
+                            }
+                            httpRes.end();
+                        })
+                        .catch(bcryptErr => console.error(bcryptErr.message));
                 } else {
-                    res.write("Username or password incorrect.");
-                    LOG(MODE.war, `login failed with username: ${query.data.username} and password: ${query.data.password}`);
+                    httpRes.write("Username or password incorrect.");
+                    LOG(MODE.war, `username: ${username} login failed`);
+                    httpRes.end();
                 }
             }
-            res.end();
         });
     }
 };
