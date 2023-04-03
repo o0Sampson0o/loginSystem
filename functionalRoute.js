@@ -1,13 +1,14 @@
 "use strict";
 
 const mysql = require("mysql2");
+const bcrypt = require("bcrypt");
 const { LOG, MODE } = require("./logger.js");
+
 require("dotenv").config();
 
-const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
-var sqlConnection = mysql.createConnection({
+const sqlConnection = mysql.createConnection({
     host: "localhost",
     user: "root",
     password: process.env.MYSQL_PASSWORD
@@ -50,8 +51,8 @@ const functionalRoute = {
                     httpRes.end();
                 });
             })
-            .catch(err => {
-                throw err;
+            .catch(bCryptErr => {
+                throw bCryptErr;
             });
     },
     "/login/api": function (httpQuery, httpRes) {
@@ -68,17 +69,17 @@ const functionalRoute = {
                         .then(bcryptResult => {
                             if (bcryptResult) {
                                 httpRes.write("Logged in.");
-                                LOG(MODE.suc, `user ${sqlResult[0].username} logged in`);
+                                LOG(MODE.suc, `user '${sqlResult[0].username}' logged in`);
                             } else {
                                 httpRes.write("Username or password incorrect.");
-                                LOG(MODE.war, `username: ${username} login failed`);
+                                LOG(MODE.war, `user '${sqlResult[0].username}' login failed`);
                             }
                             httpRes.end();
                         })
                         .catch(bcryptErr => console.error(bcryptErr.message));
                 } else {
                     httpRes.write("Username or password incorrect.");
-                    LOG(MODE.war, `username: ${username} login failed`);
+                    LOG(MODE.war, `user '${httpQuery.data.username}' login failed`);
                     httpRes.end();
                 }
             }

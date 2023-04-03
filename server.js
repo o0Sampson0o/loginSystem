@@ -12,23 +12,18 @@ const ngrok = require("ngrok");
 const functionalRoute = require("./functionalRoute");
 
 http.createServer(function (httpRequest, httpRespond) {
-    const urlObj = url.parse(httpRequest.url);
-    const queryDestruct = urlObj.query?.split(/[&=]/);
-    let queryObj = {};
+    const urlObj = url.parse(httpRequest.url, true);
+    const queryObj = urlObj.query;
 
     httpRespond.setHeader("Access-Control-Allow-Origin", "*");
     httpRespond.setHeader("Access-Control-Request-Method", "*");
     httpRespond.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
     httpRespond.setHeader("Access-Control-Allow-Headers", "*");
+
     if (httpRequest.method === "OPTIONS") {
         httpRespond.writeHead(200);
         httpRespond.end();
         return;
-    }
-    if (queryDestruct?.length) {
-        for (let i = 0; i < queryDestruct.length; i += 2) {
-            queryObj[queryDestruct[i]] = queryDestruct[i + 1];
-        }
     }
 
     (async function () {
@@ -45,13 +40,9 @@ http.createServer(function (httpRequest, httpRespond) {
         } else {
             const fileType = urlObj.pathname.split(".")[1];
             let contentType = "";
-            if (fileType === undefined) {
-                urlObj.pathname += "index.html";
-            }
-            if (fileType === "ico") {
-                httpRespond.end();
-                return;
-            } else if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";
+            if (fileType === undefined) urlObj.pathname += "index.html";
+            if (fileType === "ico") { httpRespond.end(); return; }
+            else if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";
             else if (fileType === "htm") contentType = "text/html";
             else if (fileType === "css") contentType = "text/css";
             else if (fileType === "js") contentType = "application/javascript";
