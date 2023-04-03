@@ -50,8 +50,10 @@ function submitForm(event) {
     })
     .then(text => {
         if (text === "success") window.location.href ="/login/index.html";
-        username.classList.add('error');
-        usernameErrorMessage.innerText = "username already exist";
+        else {
+            username.classList.add('error');
+            usernameErrorMessage.innerText = "username already exist";
+        }
     })
     .catch(error => {
         console.error(`Error: ${error.message}`);

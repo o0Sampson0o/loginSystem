@@ -2,7 +2,9 @@
 
 const http = require("http");
 const url = require("url");
-const route = require("./route");
+const fs = require("fs");
+
+const functionalRoute = require("./functionalRoute");
 
 http.createServer(function (httpRequest, httpRespond) {
     const urlObj = url.parse(httpRequest.url);
@@ -24,10 +26,40 @@ http.createServer(function (httpRequest, httpRespond) {
         return rawData === "" ? {} : JSON.parse(rawData);
     })().then((data) => {
         queryObj.data = data;
-        if (route[urlObj.pathname]) {
-            route[urlObj.pathname](queryObj, httpRespond)
+        if (functionalRoute[urlObj.pathname]) {
+            functionalRoute[urlObj.pathname](queryObj, httpRespond)
         } else {
-            console.log(urlObj.pathname);
+            const fileType = urlObj.pathname.split('.')[1];
+            let contentType = "";
+            if (fileType === undefined) {
+                urlObj.pathname += "index.html";
+            }
+            if (fileType === "ico") {
+                httpRespond.end(); return;
+            }
+            else if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";
+            else if (fileType === "htm") contentType = "text/html";
+            else if (fileType === "css") contentType = "text/css";
+            else if (fileType === "js") contentType = "application/javascript";
+            fs.readFile(`.${urlObj.pathname}`, function (err, file) {
+                if (!err) {
+                    httpRespond.writeHead(200, { "Content-Type": contentType });
+                    httpRespond.write(file);
+                    httpRespond.end();
+                }
+                else {
+                    fs.readFile("./404.html", function (err404, html404) {
+                        if (!err404) {
+                            httpRespond.writeHead(404, { "Content-Type": "text/html" });
+                            httpRespond.write(html404);
+                            httpRespond.end();
+                        }
+                        else {
+                            throw err404;
+                        }
+                    });
+                }
+            });
         }
     });
 }).listen(8080);
