@@ -3,17 +3,20 @@
 const http = require("http");
 const url = require("url");
 const fs = require("fs");
+const util = require('util');
 const pathUrls = require("./urls");
 
 const functionalRoute = require("./functionalRoute");
+
 
 http.createServer(function (httpRequest, httpRespond) {
     const urlObj = url.parse(httpRequest.url, true);
     const queryFromUrl = urlObj.query;
 
-    const parsedUrl = urlObj.pathname.match(/[^\/]+\/?|\//g);
-    parsedUrl.shift();
-    console.log(parsedUrl);
+    const parsedUrl = parseUrl(urlObj.pathname);
+    if (parsedUrl.length > 1) {
+        parsedUrl.shift();
+    }
     const cookies = parseCookies(httpRequest);
 
     httpRespond.setHeader("Access-Control-Allow-Origin", "*");
@@ -35,19 +38,24 @@ http.createServer(function (httpRequest, httpRespond) {
         const rawData = Buffer.concat(buffers).toString();
         return rawData === "" ? {} : JSON.parse(rawData);
     })().then(queryFromBody => {
-        const query = {url: queryFromUrl, body: queryFromBody, cookies};
-        
-        execute(parsedUrl, {query, httpRespond});
-        
-        
+        const query = { url: queryFromUrl, body: queryFromBody, cookies };
+
+        let found = execute(parsedUrl, { query, httpRespond });
+
+        if (found) {
+            console.log(found);
+            return;
+        }
         if (functionalRoute[urlObj.pathname]) {
             functionalRoute[urlObj.pathname](query, httpRespond);
         } else {
             const fileType = urlObj.pathname.split(".")[1];
             let contentType = "";
             if (fileType === undefined) urlObj.pathname += "index.html";
-            if (fileType === "ico") { httpRespond.end(); return; }
-            else if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";
+            if (fileType === "ico") {
+                httpRespond.end();
+                return;
+            } else if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";
             else if (fileType === "htm") contentType = "text/html";
             else if (fileType === "css") contentType = "text/css";
             else if (fileType === "js") contentType = "application/javascript";
@@ -72,13 +80,13 @@ http.createServer(function (httpRequest, httpRespond) {
     });
 }).listen(8080);
 
-function parseCookies (request) {
+function parseCookies(request) {
     const list = {};
     const cookieHeader = request.headers?.cookie;
     if (!cookieHeader) return list;
 
-    cookieHeader.split(`;`).forEach(function(cookie) {
-        let [ name, ...rest] = cookie.split(`=`);
+    cookieHeader.split(`;`).forEach(function (cookie) {
+        let [name, ...rest] = cookie.split(`=`);
         name = name?.trim();
         if (!name) return;
         const value = rest.join(`=`).trim();
@@ -98,6 +106,40 @@ async function readRequestBody(httpRequest) {
     return rawData === "" ? {} : JSON.parse(rawData);
 }
 
+// messenger/<int id>/index.html
 function execute(url, data) {
-    pathUrls;
+    const stack = [...pathUrls.map(x => ({...x, currentUrl: [...url]}))];
+    let found = false;
+    while (stack.length !== 0) {
+        const { token, chain, currentUrl } = stack.pop();
+        
+        let match = true;
+
+        for (let i = 0; i < token.length; i++) {
+            if (!token.dynamic) {
+                if (token[i].word !== currentUrl[i]) {
+                    match = false;
+                    break;
+                }
+            }
+        }
+
+        if (match) {
+            currentUrl.splice(0, token.length);
+            if (typeof chain !== "function") {
+                stack.push(...chain.map(x => ({...x, currentUrl})));
+            } else {
+                found = true;
+                chain(...Object.values(data));
+                console.log(util.inspect(chain, true, null, true));
+                break;
+            }
+        }
+    }
+    return found;
+
+}
+
+function parseUrl(string) {
+    return string.match(/[^\/]+\/?|\//g);
 }
