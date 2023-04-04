@@ -23,7 +23,7 @@ function LOG(mode, string) {
     } else if (mode === MODE.err) {
         console.log(red);
     }
-    console.log(`${dateString}-${date.toTimeString().split(' ')[0]}: ${string}`, reset);
+    console.log(`${mode}: ${dateString}-${date.toTimeString().split(' ')[0]}: ${string}`, reset);
 }
 
 module.exports.LOG = LOG;

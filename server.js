@@ -4,16 +4,13 @@ const http = require("http");
 const url = require("url");
 const fs = require("fs");
 
-const ngrok = require("ngrok");
-(async function () {
-    const url = await ngrok.connect();
-})();
-
 const functionalRoute = require("./functionalRoute");
 
 http.createServer(function (httpRequest, httpRespond) {
     const urlObj = url.parse(httpRequest.url, true);
-    const queryObj = urlObj.query;
+    const queryFromUrl = urlObj.query;
+
+    const cookies = parseCookies(httpRequest);
 
     httpRespond.setHeader("Access-Control-Allow-Origin", "*");
     httpRespond.setHeader("Access-Control-Request-Method", "*");
@@ -33,10 +30,10 @@ http.createServer(function (httpRequest, httpRespond) {
         }
         const rawData = Buffer.concat(buffers).toString();
         return rawData === "" ? {} : JSON.parse(rawData);
-    })().then(data => {
-        queryObj.data = data;
+    })().then(queryFromBody => {
+        const query = {url: queryFromUrl, body: queryFromBody, cookies};
         if (functionalRoute[urlObj.pathname]) {
-            functionalRoute[urlObj.pathname](queryObj, httpRespond);
+            functionalRoute[urlObj.pathname](query, httpRespond);
         } else {
             const fileType = urlObj.pathname.split(".")[1];
             let contentType = "";
@@ -66,3 +63,20 @@ http.createServer(function (httpRequest, httpRespond) {
         }
     });
 }).listen(8080);
+
+function parseCookies (request) {
+    const list = {};
+    const cookieHeader = request.headers?.cookie;
+    if (!cookieHeader) return list;
+
+    cookieHeader.split(`;`).forEach(function(cookie) {
+        let [ name, ...rest] = cookie.split(`=`);
+        name = name?.trim();
+        if (!name) return;
+        const value = rest.join(`=`).trim();
+        if (!value) return;
+        list[name] = decodeURIComponent(value);
+    });
+
+    return list;
+}
