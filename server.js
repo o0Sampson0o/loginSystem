@@ -3,6 +3,7 @@
 const http = require("http");
 const url = require("url");
 const fs = require("fs");
+const pathUrls = require("./urls");
 
 const functionalRoute = require("./functionalRoute");
 
@@ -10,6 +11,9 @@ http.createServer(function (httpRequest, httpRespond) {
     const urlObj = url.parse(httpRequest.url, true);
     const queryFromUrl = urlObj.query;
 
+    const parsedUrl = urlObj.pathname.match(/[^\/]+\/?|\//g);
+    parsedUrl.shift();
+    console.log(parsedUrl);
     const cookies = parseCookies(httpRequest);
 
     httpRespond.setHeader("Access-Control-Allow-Origin", "*");
@@ -32,6 +36,10 @@ http.createServer(function (httpRequest, httpRespond) {
         return rawData === "" ? {} : JSON.parse(rawData);
     })().then(queryFromBody => {
         const query = {url: queryFromUrl, body: queryFromBody, cookies};
+        
+        execute(parsedUrl, {query, httpRespond});
+        
+        
         if (functionalRoute[urlObj.pathname]) {
             functionalRoute[urlObj.pathname](query, httpRespond);
         } else {
@@ -79,4 +87,17 @@ function parseCookies (request) {
     });
 
     return list;
+}
+
+async function readRequestBody(httpRequest) {
+    const buffers = [];
+    for await (const chunk of httpRequest) {
+        buffers.push(chunk);
+    }
+    const rawData = Buffer.concat(buffers).toString();
+    return rawData === "" ? {} : JSON.parse(rawData);
+}
+
+function execute(url, data) {
+    pathUrls;
 }

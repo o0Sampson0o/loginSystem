@@ -1,48 +1,16 @@
 "use strict";
 
 const bcrypt = require("bcrypt");
-const { LOG, MODE } = require("./logger.js");
-const  sqlConnection = require("./sqlConnection.js");
+const { LOG, MODE } = require("../logger.js");
+const  sqlConnection = require("../sqlConnection.js");
+
 const database = "messenger";
 const userTable = `${database}.user`;
 require("dotenv").config();
 
-const saltRounds = 10;
 
-const functionalRoute = {
-    "/": function (httpQuery, httpRes) {
-        httpRes.writeHead(301, { Location: "./login/" });
-        httpRes.end();
-    },
-    "/signup/api": function (httpQuery, httpRes) {
-        const username = sqlEscape(httpQuery.body.username);
-        const password = httpQuery.body.password;
-        bcrypt
-            .genSalt(saltRounds)
-            .then(salt => bcrypt.hash(password, salt))
-            .then(hashedPassword => {
-                const sql = `INSERT INTO ${userTable} (username, hashedPassword) VALUES ('${username}', '${hashedPassword}')`;
-                sqlConnection.query(sql, (sqlErr, sqlResult) => {
-                    if (!sqlErr) {
-                        httpRes.writeHead(200, { "Content-Type": "text/html" });
-                        httpRes.write("success");
-                        httpRes.end();
-                        LOG(MODE.suc, `user '${username}' created`);
-                    } else if (sqlErr.code === "ER_DUP_ENTRY") {
-                        httpRes.writeHead(200, { "Content-Type": "text/html" });
-                        httpRes.write("username already exist");
-                        httpRes.end();
-                        LOG(MODE.war, `create error user '${username}' already exist`);
-                    } else {
-                        throw sqlErr;
-                    }
-                });
-            })
-            .catch(bCryptErr => {
-                throw bCryptErr;
-            });
-    },
-    "/login/api": function (httpQuery, httpRes) {
+const router = {
+    "/api": function (httpQuery, httpRes) {
         const username = sqlEscape(httpQuery.body.username);
         const password = httpQuery.body.password;
         const sql = `SELECT username, hashedPassword FROM ${userTable} WHERE username='${username}'`;
@@ -82,5 +50,3 @@ const functionalRoute = {
 function sqlEscape(string) {
     return string.replace(/[']/g, "''");
 }
-
-module.exports = functionalRoute;
