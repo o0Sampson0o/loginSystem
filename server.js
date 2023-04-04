@@ -3,11 +3,8 @@
 const http = require("http");
 const url = require("url");
 const fs = require("fs");
-const util = require('util');
 const pathUrls = require("./urls");
-
-const functionalRoute = require("./functionalRoute");
-
+const { parseUrl } = require("./utils/routeUtils");
 
 http.createServer(function (httpRequest, httpRespond) {
     const urlObj = url.parse(httpRequest.url, true);
@@ -43,40 +40,35 @@ http.createServer(function (httpRequest, httpRespond) {
         let found = execute(parsedUrl, { query, httpRespond });
 
         if (found) {
-            console.log(found);
             return;
         }
-        if (functionalRoute[urlObj.pathname]) {
-            functionalRoute[urlObj.pathname](query, httpRespond);
-        } else {
-            const fileType = urlObj.pathname.split(".")[1];
-            let contentType = "";
-            if (fileType === undefined) urlObj.pathname += "index.html";
-            if (fileType === "ico") {
+        const fileType = urlObj.pathname.split(".")[1];
+        let contentType = "";
+        if (fileType === undefined) urlObj.pathname += "index.html";
+        if (fileType === "ico") {
+            httpRespond.end();
+            return;
+        } else if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";
+        else if (fileType === "htm") contentType = "text/html";
+        else if (fileType === "css") contentType = "text/css";
+        else if (fileType === "js") contentType = "application/javascript";
+        fs.readFile(`.${urlObj.pathname}`, function (err, file) {
+            if (!err) {
+                httpRespond.writeHead(200, { "Content-Type": contentType });
+                httpRespond.write(file);
                 httpRespond.end();
-                return;
-            } else if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";
-            else if (fileType === "htm") contentType = "text/html";
-            else if (fileType === "css") contentType = "text/css";
-            else if (fileType === "js") contentType = "application/javascript";
-            fs.readFile(`.${urlObj.pathname}`, function (err, file) {
-                if (!err) {
-                    httpRespond.writeHead(200, { "Content-Type": contentType });
-                    httpRespond.write(file);
-                    httpRespond.end();
-                } else {
-                    fs.readFile("./404.html", function (err404, html404) {
-                        if (!err404) {
-                            httpRespond.writeHead(404, { "Content-Type": "text/html" });
-                            httpRespond.write(html404);
-                            httpRespond.end();
-                        } else {
-                            throw err404;
-                        }
-                    });
-                }
-            });
-        }
+            } else {
+                fs.readFile("./404.html", function (err404, html404) {
+                    if (!err404) {
+                        httpRespond.writeHead(404, { "Content-Type": "text/html" });
+                        httpRespond.write(html404);
+                        httpRespond.end();
+                    } else {
+                        throw err404;
+                    }
+                });
+            }
+        });
     });
 }).listen(8080);
 
@@ -108,11 +100,11 @@ async function readRequestBody(httpRequest) {
 
 // messenger/<int id>/index.html
 function execute(url, data) {
-    const stack = [...pathUrls.map(x => ({...x, currentUrl: [...url]}))];
+    const stack = [...pathUrls.map(x => ({ ...x, currentUrl: [...url] }))];
     let found = false;
     while (stack.length !== 0) {
         const { token, chain, currentUrl } = stack.pop();
-        
+
         let match = true;
 
         for (let i = 0; i < token.length; i++) {
@@ -127,19 +119,13 @@ function execute(url, data) {
         if (match) {
             currentUrl.splice(0, token.length);
             if (typeof chain !== "function") {
-                stack.push(...chain.map(x => ({...x, currentUrl})));
+                stack.push(...chain.map(x => ({ ...x, currentUrl })));
             } else {
                 found = true;
                 chain(...Object.values(data));
-                console.log(util.inspect(chain, true, null, true));
                 break;
             }
         }
     }
     return found;
-
-}
-
-function parseUrl(string) {
-    return string.match(/[^\/]+\/?|\//g);
 }
