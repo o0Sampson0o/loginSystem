@@ -35,14 +35,12 @@ http.createServer(function (httpRequest, httpRespond) {
         return rawData === "" ? {} : JSON.parse(rawData);
     })().then(queryFromBody => {
         const cookies = parseCookies(httpRequest);
-        console.log(parsedUrl);
         const query = { url: queryFromUrl, body: queryFromBody, cookies };
         let found = execute(parsedUrl, { httpQuery: query, httpRes: httpRespond });
 
         if (found) {
             return;
         }
-        console.log(urlObj.pathname);
 
         fs.readFile("./404.html", function (err404, html404) {
             if (!err404) {
@@ -102,7 +100,6 @@ function execute(url, data) {
             }
             else {
                 const cleanedUpWord = token[i].slash ? currentUrl[i].slice(0, -1) : currentUrl[i];
-                console.log(token[i].name, cleanedUpWord);
                 if (token[i].type === "int" && !isNaN(cleanedUpWord)) {
                     currentVars_[token[i].name] = +cleanedUpWord;
                 } else if (token[i].type === "str") {

@@ -123,6 +123,8 @@ function serveBackground({httpQuery, httpRes}) {
     });
 }
 
+// TODO: create a folder named static for all static file
+
 const urls = [
     route("/", serveHtml),
     route("index.html", serveHtml),

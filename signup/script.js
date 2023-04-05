@@ -51,7 +51,7 @@ function submitForm(event) {
         return httpResponse.text();
     })
     .then(text => {
-        if (text === "success") window.location.href ="/login/index.html";
+        if (text === "success") window.location.href ="/";
         else {
             username.classList.add('error');
             usernameErrorMessage.innerText = "username already exist";

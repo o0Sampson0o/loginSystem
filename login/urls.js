@@ -25,7 +25,6 @@ function login({httpQuery, httpRes}) {
                     .then(bcryptResult => {
                         if (bcryptResult) {
                             httpRes.setHeader("Set-Cookie", `userId=${sqlResult[0].userId};path=/`);
-                            httpRes.setHeader("Path", "/");
                             httpRes.writeHead(200, { "Content-Type": "text/html" });
                             httpRes.write("Logged in.");
                             httpRes.end();
@@ -50,8 +49,7 @@ function login({httpQuery, httpRes}) {
     });
 }
 
-function RedirectIfLoggedinOrServeHtml({httpQuery, httpRes}) {
-    console.log("heello", httpQuery);
+function RedirectIfLoggedInOrServeHtml({httpQuery, httpRes}) {
     if (httpQuery.cookies.userId) {
         httpRes.writeHead(307, { Location: "/messenger/" });
         httpRes.end();
@@ -60,66 +58,6 @@ function RedirectIfLoggedinOrServeHtml({httpQuery, httpRes}) {
     fs.readFile(`./login/static/index.html`, function (err, file) {
         if (!err) {
             httpRes.writeHead(200, { "Content-Type": "text/html" });
-            httpRes.write(file);
-            httpRes.end();
-        } else {
-            fs.readFile("./404.html", function (err404, html404) {
-                if (!err404) {
-                    httpRes.writeHead(404, { "Content-Type": "text/html" });
-                    httpRes.write(html404);
-                    httpRes.end();
-                } else {
-                    throw err404;
-                }
-            });
-        }
-    });
-}
-
-function serveJs({httpQuery, httpRes}) {
-    fs.readFile(`./login/script.js`, function (err, file) {
-        if (!err) {
-            httpRes.writeHead(200, { "Content-Type": "application/javascript" });
-            httpRes.write(file);
-            httpRes.end();
-        } else {
-            fs.readFile("./404.html", function (err404, html404) {
-                if (!err404) {
-                    httpRes.writeHead(404, { "Content-Type": "text/html" });
-                    httpRes.write(html404);
-                    httpRes.end();
-                } else {
-                    throw err404;
-                }
-            });
-        }
-    });
-}
-
-function serveCss({httpQuery, httpRes}) {
-    fs.readFile(`./login/style.css`, function (err, file) {
-        if (!err) {
-            httpRes.writeHead(200, { "Content-Type": "text/css" });
-            httpRes.write(file);
-            httpRes.end();
-        } else {
-            fs.readFile("./404.html", function (err404, html404) {
-                if (!err404) {
-                    httpRes.writeHead(404, { "Content-Type": "text/html" });
-                    httpRes.write(html404);
-                    httpRes.end();
-                } else {
-                    throw err404;
-                }
-            });
-        }
-    });
-}
-
-function serveBackground({httpQuery, httpRes}) {
-    fs.readFile(`./login/images/background.jpg`, function (err, file) {
-        if (!err) {
-            httpRes.writeHead(200, { "Content-Type": "text/css" });
             httpRes.write(file);
             httpRes.end();
         } else {
@@ -145,7 +83,6 @@ function serveStaticFile({httpQuery, httpRes, subFolderName, fileName}) {
     else if (fileType === "css") contentType = "text/css";
     else if (fileType === "js") contentType = "application/javascript";
 
-    console.log("here",`./static/${subFolderName?`${subFolderName}/`:''}${fileName}`);
     fs.readFile(`./login/static/${subFolderName?`${subFolderName}/`:''}${fileName}`, function (err, file) {
         if (!err) {
             httpRes.writeHead(200, { "Content-Type": contentType });
@@ -166,13 +103,9 @@ function serveStaticFile({httpQuery, httpRes, subFolderName, fileName}) {
 }
 
 const urls = [
-    route("/", RedirectIfLoggedinOrServeHtml),
+    route("/", RedirectIfLoggedInOrServeHtml),
     route("static/<str fileName>", serveStaticFile),
     route("static/<str subFolderName>/<str fileName>", serveStaticFile),
-    route("index.html", RedirectIfLoggedinOrServeHtml),
-    route("script.js", serveJs),
-    route("style.css", serveCss),
-    route("images/background.jpg", serveBackground),
     route("api", login),
 ];
 
