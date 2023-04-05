@@ -4,18 +4,19 @@ function parseUrl(string) {
 
 function route(url, next) {
     const parsedUrl = parseUrl(url).map(x => {
-        if (x[0] !== "<" || x[x.length - 2] !== ">") {
+        const slashed = x[x.length - 1] === "/";
+        if (x[0] === "<" && x[x.length - (slashed ? 2 : 1)] === ">" ) {
+                const [type, name] = x.substr(1, x.length - (slashed ? 3 : 2)).split(" ");
+                return {
+                    dynamic: true,
+                    type,
+                    name,
+                    slash: slashed
+                };
+        } else {
             return {
                 dynamic: false,
                 word: x
-            };
-        } else {
-            const [type, name] = token.substr(1, token.length - 3).split(" ");
-            return {
-                dynamic: true,
-                type,
-                name,
-                slash: x[length - 1] === "/"
             };
         }
     });

@@ -14,7 +14,6 @@ http.createServer(function (httpRequest, httpRespond) {
     if (parsedUrl.length > 1) {
         parsedUrl.shift();
     }
-    const cookies = parseCookies(httpRequest);
 
     httpRespond.setHeader("Access-Control-Allow-Origin", "*");
     httpRespond.setHeader("Access-Control-Request-Method", "*");
@@ -35,38 +34,23 @@ http.createServer(function (httpRequest, httpRespond) {
         const rawData = Buffer.concat(buffers).toString();
         return rawData === "" ? {} : JSON.parse(rawData);
     })().then(queryFromBody => {
+        const cookies = parseCookies(httpRequest);
+        console.log(parsedUrl);
         const query = { url: queryFromUrl, body: queryFromBody, cookies };
-
-        let found = execute(parsedUrl, { query, httpRespond });
+        let found = execute(parsedUrl, { httpQuery: query, httpRes: httpRespond });
 
         if (found) {
             return;
         }
-        const fileType = urlObj.pathname.split(".")[1];
-        let contentType = "";
-        if (fileType === undefined) urlObj.pathname += "index.html";
-        if (fileType === "ico") {
-            httpRespond.end();
-            return;
-        } else if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";
-        else if (fileType === "htm") contentType = "text/html";
-        else if (fileType === "css") contentType = "text/css";
-        else if (fileType === "js") contentType = "application/javascript";
-        fs.readFile(`.${urlObj.pathname}`, function (err, file) {
-            if (!err) {
-                httpRespond.writeHead(200, { "Content-Type": contentType });
-                httpRespond.write(file);
+        console.log(urlObj.pathname);
+
+        fs.readFile("./404.html", function (err404, html404) {
+            if (!err404) {
+                httpRespond.writeHead(404, { "Content-Type": "text/html" });
+                httpRespond.write(html404);
                 httpRespond.end();
             } else {
-                fs.readFile("./404.html", function (err404, html404) {
-                    if (!err404) {
-                        httpRespond.writeHead(404, { "Content-Type": "text/html" });
-                        httpRespond.write(html404);
-                        httpRespond.end();
-                    } else {
-                        throw err404;
-                    }
-                });
+                throw err404;
             }
         });
     });
@@ -100,29 +84,42 @@ async function readRequestBody(httpRequest) {
 
 // messenger/<int id>/index.html
 function execute(url, data) {
-    const stack = [...pathUrls.map(x => ({ ...x, currentUrl: [...url] }))];
+    const stack = [...pathUrls.map(x => ({ ...x, currentUrl: [...url], currentVars: {} }))];
     let found = false;
     while (stack.length !== 0) {
-        const { token, chain, currentUrl } = stack.pop();
-
+        const { token, chain, currentUrl, currentVars } = stack.pop();
+        
         let match = true;
-
+        
+        const currentVars_ = {...currentVars};
+        if (currentUrl.length < token.length) continue;
         for (let i = 0; i < token.length; i++) {
-            if (!token.dynamic) {
+            if (!token[i].dynamic) {
                 if (token[i].word !== currentUrl[i]) {
                     match = false;
                     break;
                 }
             }
+            else {
+                const cleanedUpWord = token[i].slash ? currentUrl[i].slice(0, -1) : currentUrl[i];
+                console.log(token[i].name, cleanedUpWord);
+                if (token[i].type === "int" && !isNaN(cleanedUpWord)) {
+                    currentVars_[token[i].name] = +cleanedUpWord;
+                } else if (token[i].type === "str") {
+                    currentVars_[token[i].name] = cleanedUpWord;
+                } else {
+                    match = false;
+                    break;
+                }
+            }
         }
-
+        
         if (match) {
-            currentUrl.splice(0, token.length);
             if (typeof chain !== "function") {
-                stack.push(...chain.map(x => ({ ...x, currentUrl })));
+                stack.push(...chain.map(x => ({ ...x, currentUrl: currentUrl.slice(token.length).length === 0 ? ["/"] : currentUrl.slice(token.length), currentVars: currentVars_ })));
             } else {
                 found = true;
-                chain(...Object.values(data));
+                chain({...data, ...currentVars_});
                 break;
             }
         }

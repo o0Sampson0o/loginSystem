@@ -3,6 +3,7 @@
 require("dotenv").config();
 
 const bcrypt = require("bcrypt");
+const fs = require("fs");
 
 const { LOG, MODE } = require("../logger.js");
 const  sqlConnection = require("../sqlConnection.js");
@@ -12,10 +13,10 @@ const { route } = require("../utils/routeUtils.js");
 const database = "messenger";
 const userTable = `${database}.user`;
 
-function login(httpQuery, httpRes) {
+function login({httpQuery, httpRes}) {
     const username = sqlEscape(httpQuery.body.username);
     const password = httpQuery.body.password;
-    const sql = `SELECT username, hashedPassword FROM ${userTable} WHERE username='${username}'`;
+    const sql = `SELECT username, hashedPassword, userId FROM ${userTable} WHERE username='${username}'`;
     sqlConnection.query(sql, (sqlErr, sqlResult) => {
         if (!sqlErr) {
             if (sqlResult.length !== 0) {
@@ -23,7 +24,8 @@ function login(httpQuery, httpRes) {
                     .compare(password, sqlResult[0].hashedPassword)
                     .then(bcryptResult => {
                         if (bcryptResult) {
-                            httpRes.setHeader("Set-Cookie", `userId=${sqlResult[0].userId}`);
+                            httpRes.setHeader("Set-Cookie", `userId=${sqlResult[0].userId};path=/`);
+                            httpRes.setHeader("Path", "/");
                             httpRes.writeHead(200, { "Content-Type": "text/html" });
                             httpRes.write("Logged in.");
                             httpRes.end();
@@ -48,8 +50,130 @@ function login(httpQuery, httpRes) {
     });
 }
 
+function RedirectIfLoggedinOrServeHtml({httpQuery, httpRes}) {
+    console.log("heello", httpQuery);
+    if (httpQuery.cookies.userId) {
+        httpRes.writeHead(307, { Location: "/messenger/" });
+        httpRes.end();
+        return;
+    }
+    fs.readFile(`./login/static/index.html`, function (err, file) {
+        if (!err) {
+            httpRes.writeHead(200, { "Content-Type": "text/html" });
+            httpRes.write(file);
+            httpRes.end();
+        } else {
+            fs.readFile("./404.html", function (err404, html404) {
+                if (!err404) {
+                    httpRes.writeHead(404, { "Content-Type": "text/html" });
+                    httpRes.write(html404);
+                    httpRes.end();
+                } else {
+                    throw err404;
+                }
+            });
+        }
+    });
+}
+
+function serveJs({httpQuery, httpRes}) {
+    fs.readFile(`./login/script.js`, function (err, file) {
+        if (!err) {
+            httpRes.writeHead(200, { "Content-Type": "application/javascript" });
+            httpRes.write(file);
+            httpRes.end();
+        } else {
+            fs.readFile("./404.html", function (err404, html404) {
+                if (!err404) {
+                    httpRes.writeHead(404, { "Content-Type": "text/html" });
+                    httpRes.write(html404);
+                    httpRes.end();
+                } else {
+                    throw err404;
+                }
+            });
+        }
+    });
+}
+
+function serveCss({httpQuery, httpRes}) {
+    fs.readFile(`./login/style.css`, function (err, file) {
+        if (!err) {
+            httpRes.writeHead(200, { "Content-Type": "text/css" });
+            httpRes.write(file);
+            httpRes.end();
+        } else {
+            fs.readFile("./404.html", function (err404, html404) {
+                if (!err404) {
+                    httpRes.writeHead(404, { "Content-Type": "text/html" });
+                    httpRes.write(html404);
+                    httpRes.end();
+                } else {
+                    throw err404;
+                }
+            });
+        }
+    });
+}
+
+function serveBackground({httpQuery, httpRes}) {
+    fs.readFile(`./login/images/background.jpg`, function (err, file) {
+        if (!err) {
+            httpRes.writeHead(200, { "Content-Type": "text/css" });
+            httpRes.write(file);
+            httpRes.end();
+        } else {
+            fs.readFile("./404.html", function (err404, html404) {
+                if (!err404) {
+                    httpRes.writeHead(404, { "Content-Type": "text/html" });
+                    httpRes.write(html404);
+                    httpRes.end();
+                } else {
+                    throw err404;
+                }
+            });
+        }
+    });
+}
+
+function serveStaticFile({httpQuery, httpRes, subFolderName, fileName}) {
+    
+    const fileType = fileName.split(".")[1];
+    let contentType = "";
+    if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";
+    else if (fileType === "htm") contentType = "text/html";
+    else if (fileType === "css") contentType = "text/css";
+    else if (fileType === "js") contentType = "application/javascript";
+
+    console.log("here",`./static/${subFolderName?`${subFolderName}/`:''}${fileName}`);
+    fs.readFile(`./login/static/${subFolderName?`${subFolderName}/`:''}${fileName}`, function (err, file) {
+        if (!err) {
+            httpRes.writeHead(200, { "Content-Type": contentType });
+            httpRes.write(file);
+            httpRes.end();
+        } else {
+            fs.readFile("./404.html", function (err404, html404) {
+                if (!err404) {
+                    httpRes.writeHead(404, { "Content-Type": "text/html" });
+                    httpRes.write(html404);
+                    httpRes.end();
+                } else {
+                    throw err404;
+                }
+            });
+        }
+    });
+}
+
 const urls = [
-    route("api", login)
+    route("/", RedirectIfLoggedinOrServeHtml),
+    route("static/<str fileName>", serveStaticFile),
+    route("static/<str subFolderName>/<str fileName>", serveStaticFile),
+    route("index.html", RedirectIfLoggedinOrServeHtml),
+    route("script.js", serveJs),
+    route("style.css", serveCss),
+    route("images/background.jpg", serveBackground),
+    route("api", login),
 ];
 
 urls.reverse();
