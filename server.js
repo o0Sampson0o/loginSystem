@@ -6,6 +6,9 @@ const fs = require("fs");
 const pathUrls = require("./urls");
 const { parseUrl } = require("./utils/routeUtils");
 
+//start wss
+require("./messenger/webSocketServer.js");
+
 http.createServer(function (httpRequest, httpRespond) {
     const urlObj = url.parse(httpRequest.url, true);
     const queryFromUrl = urlObj.query;
@@ -42,7 +45,6 @@ http.createServer(function (httpRequest, httpRespond) {
         if (found) {
             return;
         }
-        console.log(found);
         fs.readFile("./404.html", function (err404, html404) {
             if (!err404) {
                 httpRespond.writeHead(404, { "Content-Type": "text/html" });

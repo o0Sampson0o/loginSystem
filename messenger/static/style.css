@@ -1,11 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');
+
+* {
+    font-family: 'Open Sans', sans-serif;
+}
+
 body {
     background-image: url(./images/background.jpg);
     background-size: cover;
 }
 
 #chat-section {
-    display: grid;
-    grid-template-columns: auto auto;
+    display: flex;
+    flex-direction: row;
 }
 #global-chat {
     grid-column: 1;
@@ -15,9 +21,16 @@ body {
 }
 
 .chat-display {
-    height: 200px;
+    font-size: 1em;
+    background: rgba(0, 0, 0, 0.8);
+    box-sizing: border-box;
+    border-style: solid;
+    border-radius: 10px;
+    border-color: black;
     overflow-y: scroll;
     overflow-wrap: break-word;
+    padding: 10px;
+    height: 400px;
 }
 
 #global-chat, #direct-chat {
@@ -25,5 +38,48 @@ body {
     width: 48vw;
 }
 .message {
+    color: azure;
     margin: 0.5em auto;
+}
+
+h1, h2 {
+    color: azure;
+}
+
+.input-form {
+    margin-top: 20px;
+}
+
+#global-chat .input-form, #direct-chat .input-form {
+    width: 100%;
+    display: flex;
+    padding: 0;
+}
+
+#global-chat .message-box, #direct-chat .message-box {
+    flex-grow: 9.5;
+}
+
+.message-box {
+    background: white;
+    font-size: 0.8em;
+    box-sizing: border-box;
+    padding: 5px 5px 5px 20px;
+    border: 1px solid black;
+    max-height: 100px;
+    overflow: auto;
+    border-radius: 1rem 0 0 1rem;
+}
+
+.message-box:focus {
+    outline: none;
+}
+
+#global-chat input[type=submit], #direct-chat input[type=submit] {
+    flex-grow: 0.5;
+    border-radius: 0 1rem 1rem 0;
+}
+
+.input-form > textarea {
+    resize: none;
 }

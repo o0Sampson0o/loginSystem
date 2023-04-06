@@ -6,14 +6,14 @@ const bcrypt = require("bcrypt");
 const fs = require("fs");
 
 const { LOG, MODE } = require("../logger.js");
-const  sqlConnection = require("../sqlConnection.js");
+const sqlConnection = require("../sqlConnection.js");
 const { sqlEscape } = require("../utils/sqlUtils.js");
 const { route } = require("../utils/routeUtils.js");
 
 const database = "messenger";
 const userTable = `${database}.user`;
 
-function login({httpQuery, httpRes}) {
+function login({ httpQuery, httpRes }) {
     const username = sqlEscape(httpQuery.body.username);
     const password = httpQuery.body.password;
     const sql = `SELECT username, hashedPassword, userId FROM ${userTable} WHERE username='${username}'`;
@@ -24,7 +24,7 @@ function login({httpQuery, httpRes}) {
                     .compare(password, sqlResult[0].hashedPassword)
                     .then(bcryptResult => {
                         if (bcryptResult) {
-                            httpRes.setHeader("Set-Cookie", `userId=${sqlResult[0].userId};path=/`);
+                            httpRes.setHeader("Set-Cookie", [`username=${sqlResult[0].username}; path=/`, `userId=${sqlResult[0].userId}; path=/`]);
                             httpRes.writeHead(200, { "Content-Type": "text/html" });
                             httpRes.write("Logged in.");
                             httpRes.end();
@@ -36,7 +36,7 @@ function login({httpQuery, httpRes}) {
                             LOG(MODE.war, `user '${sqlResult[0].username}' login failed`);
                         }
                     })
-                    .catch(bcryptErr => console.error(bcryptErr.message));  
+                    .catch(bcryptErr => console.error(bcryptErr.message));
             } else {
                 httpRes.writeHead(200, { "Content-Type": "text/plain" });
                 httpRes.write("Username or password incorrect.");
@@ -49,8 +49,8 @@ function login({httpQuery, httpRes}) {
     });
 }
 
-function RedirectIfLoggedInOrServeHtml({httpQuery, httpRes}) {
-    if (httpQuery.cookies.userId) {
+function RedirectIfLoggedInOrServeHtml({ httpQuery, httpRes }) {
+    if (httpQuery.cookies.userId && httpQuery.cookies.username) {
         httpRes.writeHead(307, { Location: "/messenger/" });
         httpRes.end();
         return;
@@ -74,7 +74,7 @@ function RedirectIfLoggedInOrServeHtml({httpQuery, httpRes}) {
     });
 }
 
-function serveStaticFile({httpQuery, httpRes, subFolderName, fileName}) {
+function serveStaticFile({ httpQuery, httpRes, subFolderName, fileName }) {
     const fileType = fileName.split(".")[1];
     let contentType = "";
     if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";
@@ -82,7 +82,7 @@ function serveStaticFile({httpQuery, httpRes, subFolderName, fileName}) {
     else if (fileType === "css") contentType = "text/css";
     else if (fileType === "js") contentType = "application/javascript";
 
-    fs.readFile(`./login/static/${subFolderName?`${subFolderName}/`:''}${fileName}`, function (err, file) {
+    fs.readFile(`./login/static/${subFolderName ? `${subFolderName}/` : ""}${fileName}`, function (err, file) {
         if (!err) {
             httpRes.writeHead(200, { "Content-Type": contentType });
             httpRes.write(file);
