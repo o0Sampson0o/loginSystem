@@ -1,0 +1,29 @@
+body {
+    background-image: url(./images/background.jpg);
+    background-size: cover;
+}
+
+#chat-section {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+#global-chat {
+    grid-column: 1;
+}
+#direct-chat {
+    grid-column: 2;
+}
+
+.chat-display {
+    height: 200px;
+    overflow-y: scroll;
+    overflow-wrap: break-word;
+}
+
+#global-chat, #direct-chat {
+    margin: auto 1vw;
+    width: 48vw;
+}
+.message {
+    margin: 0.5em auto;
+}

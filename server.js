@@ -36,12 +36,13 @@ http.createServer(function (httpRequest, httpRespond) {
     })().then(queryFromBody => {
         const cookies = parseCookies(httpRequest);
         const query = { url: queryFromUrl, body: queryFromBody, cookies };
+
         let found = execute(parsedUrl, { httpQuery: query, httpRes: httpRespond });
 
         if (found) {
             return;
         }
-
+        console.log(found);
         fs.readFile("./404.html", function (err404, html404) {
             if (!err404) {
                 httpRespond.writeHead(404, { "Content-Type": "text/html" });
@@ -111,13 +112,16 @@ function execute(url, data) {
             }
         }
         
+
         if (match) {
             if (typeof chain !== "function") {
                 stack.push(...chain.map(x => ({ ...x, currentUrl: currentUrl.slice(token.length).length === 0 ? ["/"] : currentUrl.slice(token.length), currentVars: currentVars_ })));
             } else {
-                found = true;
-                chain({...data, ...currentVars_});
-                break;
+                if (currentUrl.length === token.length) {
+                    found = true;
+                    chain({...data, ...currentVars_});
+                    break;
+                }
             }
         }
     }

@@ -36,7 +36,7 @@ function login({httpQuery, httpRes}) {
                             LOG(MODE.war, `user '${sqlResult[0].username}' login failed`);
                         }
                     })
-                    .catch(bcryptErr => console.error(bcryptErr.message));
+                    .catch(bcryptErr => console.error(bcryptErr.message));  
             } else {
                 httpRes.writeHead(200, { "Content-Type": "text/plain" });
                 httpRes.write("Username or password incorrect.");
@@ -75,7 +75,6 @@ function RedirectIfLoggedInOrServeHtml({httpQuery, httpRes}) {
 }
 
 function serveStaticFile({httpQuery, httpRes, subFolderName, fileName}) {
-    
     const fileType = fileName.split(".")[1];
     let contentType = "";
     if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";
@@ -106,7 +105,7 @@ const urls = [
     route("/", RedirectIfLoggedInOrServeHtml),
     route("static/<str fileName>", serveStaticFile),
     route("static/<str subFolderName>/<str fileName>", serveStaticFile),
-    route("api", login),
+    route("api", login)
 ];
 
 urls.reverse();
