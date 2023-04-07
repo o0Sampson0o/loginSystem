@@ -13,16 +13,10 @@ body {
     display: flex;
     flex-direction: row;
 }
-#global-chat {
-    grid-column: 1;
-}
-#direct-chat {
-    grid-column: 2;
-}
 
 .chat-display {
     font-size: 1em;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.8); 
     box-sizing: border-box;
     border-style: solid;
     border-radius: 10px;
@@ -31,6 +25,10 @@ body {
     overflow-wrap: break-word;
     padding: 10px;
     height: 400px;
+}
+
+.chat-display-new-notification {
+    border-color: aqua !important;
 }
 
 #global-chat, #direct-chat {
@@ -56,10 +54,6 @@ h1, h2 {
     padding: 0;
 }
 
-#global-chat .message-box, #direct-chat .message-box {
-    flex-grow: 9.5;
-}
-
 .message-box {
     background: white;
     font-size: 0.8em;
@@ -75,6 +69,10 @@ h1, h2 {
     outline: none;
 }
 
+#global-chat .message-box, #direct-chat .message-box {
+    flex-grow: 9.5;
+}
+
 #global-chat input[type=submit], #direct-chat input[type=submit] {
     flex-grow: 0.5;
     border-radius: 0 1rem 1rem 0;
@@ -82,4 +80,11 @@ h1, h2 {
 
 .input-form > textarea {
     resize: none;
+}
+
+.new-notification {
+    opacity: 0;
+    margin: 0;
+    font-size: small;
+    color: aqua;
 }

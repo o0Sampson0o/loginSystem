@@ -24,7 +24,7 @@ function login({ httpQuery, httpRes }) {
                     .compare(password, sqlResult[0].hashedPassword)
                     .then(bcryptResult => {
                         if (bcryptResult) {
-                            httpRes.setHeader("Set-Cookie", [`username=${sqlResult[0].username}; path=/`, `userId=${sqlResult[0].userId}; path=/`]);
+                            httpRes.setHeader("Set-Cookie", [`username=${sqlResult[0].username}; path=/;SameSite=None;Secure`, `userId=${sqlResult[0].userId}; path=/;SameSite=None;Secure`]);
                             httpRes.writeHead(200, { "Content-Type": "text/html" });
                             httpRes.write("Logged in.");
                             httpRes.end();
