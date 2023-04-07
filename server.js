@@ -5,30 +5,30 @@ const url = require("url");
 const fs = require("fs");
 const pathUrls = require("./urls");
 const { parseUrl } = require("./utils/routeUtils");
+const { v4: uuidv4 } = require('uuid');
 
 //start wss
-require("./messenger/webSocketServer.js");
 
-http.createServer(function (httpRequest, httpRespond) {
+const httpServer = http.createServer(function (httpRequest, httpRespond) {
     const urlObj = url.parse(httpRequest.url, true);
     const queryFromUrl = urlObj.query;
-
+    
     const parsedUrl = parseUrl(urlObj.pathname);
     if (parsedUrl.length > 1) {
         parsedUrl.shift();
     }
-
+    
     httpRespond.setHeader("Access-Control-Allow-Origin", "*");
     httpRespond.setHeader("Access-Control-Request-Method", "*");
-    httpRespond.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
+    httpRespond.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, UPGRADE");
     httpRespond.setHeader("Access-Control-Allow-Headers", "*");
-
+    
     if (httpRequest.method === "OPTIONS") {
         httpRespond.writeHead(200);
         httpRespond.end();
         return;
     }
-
+    
     (async function () {
         const buffers = [];
         for await (const chunk of httpRequest) {
@@ -61,7 +61,7 @@ function parseCookies(request) {
     const list = {};
     const cookieHeader = request.headers?.cookie;
     if (!cookieHeader) return list;
-
+    
     cookieHeader.split(`;`).forEach(function (cookie) {
         let [name, ...rest] = cookie.split(`=`);
         name = name?.trim();
@@ -70,7 +70,7 @@ function parseCookies(request) {
         if (!value) return;
         list[name] = decodeURIComponent(value);
     });
-
+    
     return list;
 }
 
@@ -114,7 +114,7 @@ function execute(url, data) {
             }
         }
         
-
+        
         if (match) {
             if (typeof chain !== "function") {
                 stack.push(...chain.map(x => ({ ...x, currentUrl: currentUrl.slice(token.length).length === 0 ? ["/"] : currentUrl.slice(token.length), currentVars: currentVars_ })));
@@ -129,3 +129,56 @@ function execute(url, data) {
     }
     return found;
 }
+
+
+const WebSocketServer = require('websocket').server;
+
+const wsServer = new WebSocketServer({
+        httpServer: httpServer,
+        autoAcceptConnections: false
+    });
+
+const clients = {}; 
+let clientsCount = 0;
+wsServer.on("request", request => {
+    const parsedUrl = parseUrl(request.resourceURL.pathname);
+    if (parsedUrl.length > 1) {
+        parsedUrl.shift();
+    }
+    
+    if (parsedUrl[0] !== "ws/" && parsedUrl[0] !== "ws") {
+        request.reject();
+        return;
+    }
+    
+    const connection = request.accept('echo-protocol', request.origin);
+
+    const cookies = {};
+    request.cookies.forEach(x => cookies[x.name] = x.value);
+    const { username, userId } = cookies;
+    const uuid = uuidv4();
+    clientsCount++;
+    clients[uuid] = {username, userId, connection};
+    connection.send(JSON.stringify({uuid}));
+    connection.on('message', data => {
+        if (data.type === 'utf8') {
+            if (data.utf8Data === "ping") {
+                return;
+            }
+            const message = JSON.parse(data.utf8Data);
+            for (const clientSessionId in clients) {
+                clients[clientSessionId].connection.sendUTF(JSON.stringify({sender: clients[message.sessionId].username, message: message.message }));
+            }
+        }
+        else if (data.type === 'binary') {
+            console.log('Received Binary Message of ' + data.binaryData.length + ' bytes');
+            //connection.sendBytes(data.binaryData);
+        }
+    });
+
+
+    connection.on('close', function(reasonCode, description) {
+        clientsCount--;
+    });
+
+});
