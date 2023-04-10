@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap");
 
 * {
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
 }
 
 body {
@@ -16,7 +16,7 @@ body {
 
 .chat-display {
     font-size: 1em;
-    background: rgba(0, 0, 0, 0.8); 
+    background: rgba(0, 0, 0, 0.8);
     box-sizing: border-box;
     border-style: solid;
     border-radius: 10px;
@@ -31,7 +31,8 @@ body {
     border-color: aqua !important;
 }
 
-#global-chat, #direct-chat {
+#global-chat,
+#direct-chat {
     margin: auto 1vw;
     width: 48vw;
 }
@@ -40,7 +41,8 @@ body {
     margin: 0.5em auto;
 }
 
-h1, h2 {
+h1,
+h2 {
     color: azure;
 }
 
@@ -48,7 +50,8 @@ h1, h2 {
     margin-top: 20px;
 }
 
-#global-chat .input-form, #direct-chat .input-form {
+#global-chat .input-form,
+#direct-chat .input-form {
     width: 100%;
     display: flex;
     padding: 0;
@@ -69,11 +72,13 @@ h1, h2 {
     outline: none;
 }
 
-#global-chat .message-box, #direct-chat .message-box {
+#global-chat .message-box,
+#direct-chat .message-box {
     flex-grow: 9.5;
 }
 
-#global-chat input[type=submit], #direct-chat input[type=submit] {
+#global-chat input[type="submit"],
+#direct-chat input[type="submit"] {
     flex-grow: 0.5;
     border-radius: 0 1rem 1rem 0;
 }

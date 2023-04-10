@@ -45,12 +45,12 @@ function trySubmit(e) {
         e.preventDefault();
     }
 }
-window.onload = () => {
 
+window.onload = () => {
     window.onfocus = () => {
         needsNotify = false;
     };
-    
+
     window.onblur = () => {
         needsNotify = true;
     };
@@ -60,20 +60,20 @@ window.onload = () => {
         document.cookie = "userId=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;username=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         window.location.href = "/";
     };
-    
+
     const directMessageForm = document.querySelector("#direct-chat .input-form");
     const globalMessageForm = document.querySelector("#global-chat .input-form");
     directMessageForm.onsubmit = submitDirectMessage;
     globalMessageForm.onsubmit = submitGlobalMessage;
     const directMessageBox = document.querySelector("#direct-chat .message-box");
     const globalMessageBox = document.querySelector("#global-chat .message-box");
-    
+
     const shiftKeyUp = e => {
         if (e.key === "Shift") {
             shiftPressed = false;
         }
     };
-    
+
     directMessageBox.onkeydown = e => {
         if (e.key === "Shift") {
             shiftPressed = true;
@@ -82,7 +82,7 @@ window.onload = () => {
             submitDirectMessage(e);
         }
     };
-    
+
     globalMessageBox.onkeydown = e => {
         if (e.key === "Shift") {
             shiftPressed = true;
@@ -91,11 +91,10 @@ window.onload = () => {
             submitGlobalMessage(e);
         }
     };
-    
+
     directMessageBox.onkeyup = shiftKeyUp;
     globalMessageBox.onkeyup = shiftKeyUp;
-    
-    
+
     const globalChatDisplay = document.getElementById("global-chat-display");
     const globalChatDisplayNotificationText = document.querySelector("#global-chat .new-notification");
 
@@ -104,14 +103,13 @@ window.onload = () => {
             globalChatDisplay.classList.remove("chat-display-new-notification");
             globalChatDisplayNotificationText.style.opacity = 0;
         }
-    }
+    };
 };
-
 
 webSocket.onmessage = event => {
     const globalChatDisplay = document.getElementById("global-chat-display");
     const globalChatDisplayNotificationText = document.querySelector("#global-chat .new-notification");
-    const {uuid, message : messageText, sender } = JSON.parse(event.data);
+    const { uuid, message: messageText, sender } = JSON.parse(event.data);
 
     if (uuid) {
         connectionSession = uuid;

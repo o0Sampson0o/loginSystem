@@ -1,5 +1,5 @@
 "use strict";
 
-module.exports.sqlEscape = function(string) {
+module.exports.sqlEscape = function (string) {
     return string.replace(/[']/g, "''");
-}
+};

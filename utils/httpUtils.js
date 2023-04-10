@@ -7,13 +7,13 @@ module.exports.readRequestBody = async function (httpRequest) {
     }
     const rawData = Buffer.concat(buffers).toString();
     return rawData === "" ? {} : JSON.parse(rawData);
-}
+};
 
-module.exports.parseCookies = function(request) {
+module.exports.parseCookies = function (request) {
     const list = {};
     const cookieHeader = request.headers?.cookie;
     if (!cookieHeader) return list;
-    
+
     cookieHeader.split(`;`).forEach(function (cookie) {
         let [name, ...rest] = cookie.split(`=`);
         name = name?.trim();
@@ -22,6 +22,6 @@ module.exports.parseCookies = function(request) {
         if (!value) return;
         list[name] = decodeURIComponent(value);
     });
-    
+
     return list;
-}
+};

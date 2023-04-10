@@ -1,9 +1,9 @@
 "use strict";
 
-const { parseCookies, readRequestBody } = require('../utils/httpUtils');
+const { parseCookies, readRequestBody } = require("../utils/httpUtils");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
-const { serve404Page, serveStaticFileFor }  = require('../utils/fileUtils.js')
+const { serve404Page, serveStaticFileFor } = require("../utils/fileUtils.js");
 const { LOG, MODE } = require("../logger.js");
 const sqlConnection = require("../sqlConnection.js");
 const { sqlEscape } = require("../utils/sqlUtils.js");
@@ -11,9 +11,8 @@ const { sqlEscape } = require("../utils/sqlUtils.js");
 const database = "messenger";
 const userTable = `${database}.user`;
 
-module.exports.login = function({ httpReq, httpRes }) {
-    readRequestBody(httpReq)
-    .then(body => {
+module.exports.login = function ({ httpReq, httpRes }) {
+    readRequestBody(httpReq).then(body => {
         const username = sqlEscape(body.username);
         const password = body.password;
         const sql = `SELECT username, hashedPassword, userId FROM ${userTable} WHERE username='${username}'`;
@@ -24,7 +23,10 @@ module.exports.login = function({ httpReq, httpRes }) {
                         .compare(password, sqlResult[0].hashedPassword)
                         .then(bcryptResult => {
                             if (bcryptResult) {
-                                httpRes.setHeader("Set-Cookie", [`username=${sqlResult[0].username}; path=/;SameSite=None;Secure`, `userId=${sqlResult[0].userId}; path=/;SameSite=None;Secure`]);
+                                httpRes.setHeader("Set-Cookie", [
+                                    `username=${sqlResult[0].username}; path=/;SameSite=None;Secure`,
+                                    `userId=${sqlResult[0].userId}; path=/;SameSite=None;Secure`
+                                ]);
                                 httpRes.writeHead(200, { "Content-Type": "text/html" });
                                 httpRes.write("Logged in.");
                                 httpRes.end();
@@ -47,10 +49,10 @@ module.exports.login = function({ httpReq, httpRes }) {
                 throw sqlErr;
             }
         });
-    })
-}
+    });
+};
 
-module.exports.RedirectIfLoggedInOrServeHtml = function({ httpReq, httpRes }) {
+module.exports.RedirectIfLoggedInOrServeHtml = function ({ httpReq, httpRes }) {
     const cookies = parseCookies(httpReq);
     if (cookies.userId && cookies.username) {
         httpRes.writeHead(307, { Location: "/messenger/" });
@@ -66,6 +68,6 @@ module.exports.RedirectIfLoggedInOrServeHtml = function({ httpReq, httpRes }) {
             serve404Page(httpRes);
         }
     });
-}
+};
 
 module.exports.serveStaticFile = serveStaticFileFor("login");

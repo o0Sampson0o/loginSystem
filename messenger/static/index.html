@@ -1,40 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="./static/script.js"></script>
-    <link rel="stylesheet" href="./static/style.css" />
-    <title>Messenger</title>
-</head>
-<body>
-    <h1>MESSENGER</h1>
-    <div id="chat-section">
-        <div id="global-chat">
-            <h2>GLOBAL CHAT</h2>
-            <p class="new-notification">new notification</p>
-            <div class="chat-display" id="global-chat-display">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="./static/script.js"></script>
+        <link rel="stylesheet" href="./static/style.css" />
+        <title>Messenger</title>
+    </head>
+    <body>
+        <h1>MESSENGER</h1>
+        <div id="chat-section">
+            <div id="global-chat">
+                <h2>GLOBAL CHAT</h2>
+                <p class="new-notification">new notification</p>
+                <div class="chat-display" id="global-chat-display"></div>
+                <form class="input-form">
+                    <div id="direct-chat-message-box" class="message-box" contenteditable></div>
+                    <input type="submit" value="send" />
+                </form>
             </div>
-            <form class="input-form">
-                <div id="direct-chat-message-box" class="message-box" contenteditable>
+            <div id="direct-chat">
+                <h2>DIRECT CHAT</h2>
+                <p class="new-notification">new notification</p>
+                <div class="chat-display" id="direct-chat-display">
+                    <div class="message">[CURRENT UNAVAILABLE]</div>
                 </div>
-                <input type="submit" value="send">
-            </form>
-        </div>
-        <div id="direct-chat">
-            <h2>DIRECT CHAT</h2>
-            <p class="new-notification">new notification</p>
-            <div class="chat-display" id="direct-chat-display">
-                <div class="message">[CURRENT UNAVAILABLE]</div>
+                <form class="input-form">
+                    <div id="direct-chat-message-box" class="message-box" contenteditable></div>
+                    <input type="submit" value="send" />
+                </form>
             </div>
-            <form class="input-form">
-                <div id="direct-chat-message-box" class="message-box" contenteditable>
-                </div>
-                <input type="submit" value="send">
-            </form>
         </div>
-    </div>
-    <hr>
-    <button id="logout-button">Log Out</button>
-</body>
+        <hr />
+        <button id="logout-button">Log Out</button>
+    </body>
 </html>

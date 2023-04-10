@@ -1,10 +1,10 @@
 "use strict";
 
 const fs = require("fs");
-const { parseCookies } = require('../utils/httpUtils.js');
-const { serve404Page, serveStaticFileFor }  = require('../utils/fileUtils.js')
+const { parseCookies } = require("../utils/httpUtils.js");
+const { serve404Page, serveStaticFileFor } = require("../utils/fileUtils.js");
 
-module.exports.ServeHtml = function({ httpReq, httpRes }) {
+module.exports.ServeHtml = function ({ httpReq, httpRes }) {
     const cookies = parseCookies(httpReq);
     if (!cookies.userId || !cookies.username) {
         httpRes.writeHead(307, { Location: "/" });
@@ -20,6 +20,6 @@ module.exports.ServeHtml = function({ httpReq, httpRes }) {
             serve404Page(httpRes);
         }
     });
-}
+};
 
 module.exports.serveStaticFile = serveStaticFileFor("messenger");

@@ -2,7 +2,7 @@
 
 const bcrypt = require("bcrypt");
 const fs = require("fs");
-const { serve404Page, serveStaticFileFor }  = require('../utils/fileUtils.js')
+const { serve404Page, serveStaticFileFor } = require("../utils/fileUtils.js");
 
 const { LOG, MODE } = require("../logger.js");
 const sqlConnection = require("../sqlConnection.js");
@@ -13,7 +13,7 @@ const saltRounds = 10;
 const database = "messenger";
 const userTable = `${database}.user`;
 
-module.exports.signup = function({ httpReq, httpRes }) {
+module.exports.signup = function ({ httpReq, httpRes }) {
     readRequestBody(httpReq).then(body => {
         const username = sqlEscape(body.username);
         const password = body.password;
@@ -42,9 +42,9 @@ module.exports.signup = function({ httpReq, httpRes }) {
                 throw bCryptErr;
             });
     });
-}
+};
 
-module.exports.serveHtml = function({ httpRes }) {
+module.exports.serveHtml = function ({ httpRes }) {
     fs.readFile(`./signup/static/index.html`, function (err, file) {
         if (!err) {
             httpRes.writeHead(200, { "Content-Type": "text/html" });
@@ -54,6 +54,6 @@ module.exports.serveHtml = function({ httpRes }) {
             serve404Page(httpRes);
         }
     });
-}
+};
 
 module.exports.serveStaticFile = serveStaticFileFor("signup");
