@@ -19,9 +19,9 @@ document.cookie
     }))
     .forEach(x => (cookies[x.name] = x.value));
 
-const domain = "3773-2001-d08-d3-66ab-4da0-519b-16eb-6174.ap.ngrok.io";
-const webSocket = new WebSocket(`wss://${domain}/ws/${cookies.userId}`, "echo-protocol");
-//const webSocket = new WebSocket(`ws://localhost:8080/ws/${cookies.userId}`, "echo-protocol");
+const domain = "f6bd-2001-d08-d3-66ab-4c00-3954-6572-222b.ngrok-free.app";
+//const webSocket = new WebSocket(`wss://${domain}/ws/${cookies.userId}`, "echo-protocol");
+const webSocket = new WebSocket(`ws://localhost:8080/ws/${cookies.userId}`, "echo-protocol");
 
 function submitDirectMessage(e) {
     e.preventDefault();

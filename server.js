@@ -1,61 +1,59 @@
 "use strict";
 
 const http = require("http");
-const url = require("url");
+const urlUtils = require("url");
 const fs = require("fs");
 const pathUrls = require("./urls");
 const { parseUrl } = require("./utils/routeUtils");
 const { v4: uuidv4 } = require('uuid');
 
-//start wss
 
-const httpServer = http.createServer(function (httpRequest, httpRespond) {
-    const urlObj = url.parse(httpRequest.url, true);
-    const queryFromUrl = urlObj.query;
+const httpServer = http.createServer(requestHandler).listen(8080);
+
+function requestHandler(httpReq, httpRes) {
+    const url = urlUtils.parse(httpReq.url, true);
+    const queryFromUrl = url.query;
     
-    const parsedUrl = parseUrl(urlObj.pathname);
-    if (parsedUrl.length > 1) {
-        parsedUrl.shift();
-    }
+    const parsedUrl = parseUrl(url.pathname);
+    if (parsedUrl.length > 1) parsedUrl.shift();
     
-    httpRespond.setHeader("Access-Control-Allow-Origin", "*");
-    httpRespond.setHeader("Access-Control-Request-Method", "*");
-    httpRespond.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, UPGRADE");
-    httpRespond.setHeader("Access-Control-Allow-Headers", "*");
-    
-    if (httpRequest.method === "OPTIONS") {
-        httpRespond.writeHead(200);
-        httpRespond.end();
+    if (httpReq.method === "OPTIONS") {
+        httpRes.setHeader("Access-Control-Allow-Origin", "*");
+        httpRes.setHeader("Access-Control-Request-Method", "*");
+        httpRes.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET");
+        httpRes.setHeader("Access-Control-Allow-Headers", "*");
+        httpRes.writeHead(200);
+        httpRes.end();
         return;
     }
     
     (async function () {
         const buffers = [];
-        for await (const chunk of httpRequest) {
+        for await (const chunk of httpReq) {
             buffers.push(chunk);
         }
         const rawData = Buffer.concat(buffers).toString();
         return rawData === "" ? {} : JSON.parse(rawData);
     })().then(queryFromBody => {
-        const cookies = parseCookies(httpRequest);
+        const cookies = parseCookies(httpReq);
         const query = { url: queryFromUrl, body: queryFromBody, cookies };
 
-        let found = execute(parsedUrl, { httpQuery: query, httpRes: httpRespond });
+        let found = execute(parsedUrl, { httpQuery: query, httpRes });
 
         if (found) {
             return;
         }
         fs.readFile("./404.html", function (err404, html404) {
             if (!err404) {
-                httpRespond.writeHead(404, { "Content-Type": "text/html" });
-                httpRespond.write(html404);
-                httpRespond.end();
+                httpRes.writeHead(404, { "Content-Type": "text/html" });
+                httpRes.write(html404);
+                httpRes.end();
             } else {
                 throw err404;
             }
         });
     });
-}).listen(8080);
+}
 
 function parseCookies(request) {
     const list = {};
@@ -83,7 +81,6 @@ async function readRequestBody(httpRequest) {
     return rawData === "" ? {} : JSON.parse(rawData);
 }
 
-// messenger/<int id>/index.html
 function execute(url, data) {
     const stack = [...pathUrls.map(x => ({ ...x, currentUrl: [...url], currentVars: {} }))];
     let found = false;
@@ -130,6 +127,7 @@ function execute(url, data) {
     return found;
 }
 
+// * ----------------------------------    WEB SOCKET SERVER   ----------------------------------------
 
 const WebSocketServer = require('websocket').server;
 
@@ -175,7 +173,6 @@ wsServer.on("request", request => {
             //connection.sendBytes(data.binaryData);
         }
     });
-
 
     connection.on('close', function(reasonCode, description) {
         clientsCount--;
