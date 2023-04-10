@@ -30,3 +30,5 @@ function LOG(mode, string) {
 
 module.exports.LOG = LOG;
 module.exports.MODE = MODE;
+
+// TODO: log to file

@@ -42,8 +42,8 @@ module.exports.login = function ({ httpReq, httpRes }) {
                 } else {
                     httpRes.writeHead(200, { "Content-Type": "text/plain" });
                     httpRes.write("Username or password incorrect.");
-                    LOG(MODE.war, `user '${body.username}' login failed`);
                     httpRes.end();
+                    LOG(MODE.war, `user '${body.username}' login failed`);
                 }
             } else {
                 throw sqlErr;
