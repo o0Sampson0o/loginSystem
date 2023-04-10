@@ -1,3 +1,5 @@
+"use strict";
+
 function parseUrl(string) {
     return string.match(/[^\/]+\/?|\//g);
 }

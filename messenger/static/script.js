@@ -1,3 +1,5 @@
+"use strict";
+
 let shiftPressed = false;
 
 const audio = new Audio("./static/audio/notification.mp3");

@@ -1,4 +1,6 @@
-var date = new Date();
+"use strict";
+
+const date = new Date();
 const white = "\x1b[37m";
 const green = "\x1b[32m";
 const yellow = "\x1b[33m";
