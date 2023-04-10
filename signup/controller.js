@@ -6,13 +6,13 @@ const fs = require("fs");
 const { LOG, MODE } = require("../logger.js");
 const sqlConnection = require("../sqlConnection.js");
 const { sqlEscape } = require("../utils/sqlUtils.js");
-const { parseCookies, readRequestBody } = require("../utils/httpUtils");
+const { readRequestBody } = require("../utils/httpUtils");
 
 const saltRounds = 10;
 const database = "messenger";
 const userTable = `${database}.user`;
 
-module.exports.signup = function({ httpQuery, httpReq, httpRes }) {
+module.exports.signup = function({ httpReq, httpRes }) {
     readRequestBody(httpReq).then(body => {
         const username = sqlEscape(body.username);
         const password = body.password;
@@ -43,7 +43,7 @@ module.exports.signup = function({ httpQuery, httpReq, httpRes }) {
     });
 }
 
-module.exports.serveHtml = function({ httpQuery, httpRes }) {
+module.exports.serveHtml = function({ httpRes }) {
     fs.readFile(`./signup/static/index.html`, function (err, file) {
         if (!err) {
             httpRes.writeHead(200, { "Content-Type": "text/html" });
@@ -63,7 +63,7 @@ module.exports.serveHtml = function({ httpQuery, httpRes }) {
     });
 }
 
-module.exports.serveStaticFile = function({ httpQuery, httpRes, subFolderName, fileName }) {
+module.exports.serveStaticFile = function({ httpRes, subFolderName, fileName }) {
     const fileType = fileName.split(".")[1];
     let contentType = "";
     if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";

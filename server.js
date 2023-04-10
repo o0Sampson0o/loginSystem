@@ -7,8 +7,9 @@ const pathUrls = require("./urls");
 const { parseUrl } = require("./utils/routeUtils");
 const { v4: uuidv4 } = require('uuid');
 
+const PORT = 8080;
 
-const httpServer = http.createServer(requestHandler).listen(8080);
+const httpServer = http.createServer(requestHandler).listen(PORT);
 
 function requestHandler(httpReq, httpRes) {
     const url = urlUtils.parse(httpReq.url, true);
@@ -17,6 +18,8 @@ function requestHandler(httpReq, httpRes) {
     const parsedUrl = parseUrl(url.pathname);
     if (parsedUrl.length > 1) parsedUrl.shift();
     
+    //* ----------------------------    CORS   ----------------------------------------
+
     if (httpReq.method === "OPTIONS") {
         httpRes.setHeader("Access-Control-Allow-Origin", "*");
         httpRes.setHeader("Access-Control-Request-Method", "*");
@@ -27,11 +30,12 @@ function requestHandler(httpReq, httpRes) {
         return;
     }
 
-    let found = execute(parsedUrl, { httpQuery, httpReq, httpRes });
+    //* --------------------------------------------------------------------------------
 
-    if (found) {
-        return;
-    }
+    const found = execute(parsedUrl, { httpQuery, httpReq, httpRes });
+
+    if (found) return;
+    
     fs.readFile("./404.html", function (err404, html404) {
         if (!err404) {
             httpRes.writeHead(404, { "Content-Type": "text/html" });

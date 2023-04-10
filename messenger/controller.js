@@ -1,9 +1,9 @@
 "use strict";
 
 const fs = require("fs");
-const { parseCookies, readRequestBody } = require('../utils/httpUtils');
+const { parseCookies } = require('../utils/httpUtils');
 
-module.exports.ServeHtml = function({ httpQuery, httpReq, httpRes }) {
+module.exports.ServeHtml = function({ httpReq, httpRes }) {
     const cookies = parseCookies(httpReq);
     if (!cookies.userId || !cookies.username) {
         httpRes.writeHead(307, { Location: "/" });
@@ -29,7 +29,7 @@ module.exports.ServeHtml = function({ httpQuery, httpReq, httpRes }) {
     });
 }
 
-module.exports.serveStaticFile = function({ httpQuery, httpRes, subFolderName, fileName }) {
+module.exports.serveStaticFile = function({ httpRes, subFolderName, fileName }) {
     const fileType = fileName.split(".")[1];
     let contentType = "";
     if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";

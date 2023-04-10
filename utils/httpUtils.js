@@ -1,6 +1,6 @@
 "use strict";
 
-async function readRequestBody(httpRequest) {
+module.exports.readRequestBody = async function (httpRequest) {
     const buffers = [];
     for await (const chunk of httpRequest) {
         buffers.push(chunk);
@@ -9,7 +9,7 @@ async function readRequestBody(httpRequest) {
     return rawData === "" ? {} : JSON.parse(rawData);
 }
 
-function parseCookies(request) {
+module.exports.parseCookies = function(request) {
     const list = {};
     const cookieHeader = request.headers?.cookie;
     if (!cookieHeader) return list;
@@ -25,6 +25,3 @@ function parseCookies(request) {
     
     return list;
 }
-
-module.exports.readRequestBody = readRequestBody;
-module.exports.parseCookies = parseCookies;

@@ -11,7 +11,7 @@ const { sqlEscape } = require("../utils/sqlUtils.js");
 const database = "messenger";
 const userTable = `${database}.user`;
 
-module.exports.login = function({ httpQuery, httpReq, httpRes }) {
+module.exports.login = function({ httpReq, httpRes }) {
     readRequestBody(httpReq)
     .then(body => {
         const username = sqlEscape(body.username);
@@ -50,7 +50,7 @@ module.exports.login = function({ httpQuery, httpReq, httpRes }) {
     })
 }
 
-module.exports.RedirectIfLoggedInOrServeHtml = function({ httpQuery, httpReq, httpRes }) {
+module.exports.RedirectIfLoggedInOrServeHtml = function({ httpReq, httpRes }) {
     const cookies = parseCookies(httpReq);
     if (cookies.userId && cookies.username) {
         httpRes.writeHead(307, { Location: "/messenger/" });
@@ -76,7 +76,7 @@ module.exports.RedirectIfLoggedInOrServeHtml = function({ httpQuery, httpReq, ht
     });
 }
 
-module.exports.serveStaticFile = function({ httpQuery, httpRes, subFolderName, fileName }) {
+module.exports.serveStaticFile = function({ httpRes, subFolderName, fileName }) {
     const fileType = fileName.split(".")[1];
     let contentType = "";
     if (fileType === "jpg" || fileType === "jpeg") contentType = "image/jpeg";
