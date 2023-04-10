@@ -1,3 +1,5 @@
+"use strict";
+
 function sqlEscape(string) {
     return string.replace(/[']/g, "''");
 }

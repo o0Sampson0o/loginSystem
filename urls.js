@@ -7,7 +7,6 @@ const signupPageUrls = require("./signup/urls");
 const messengerPageUrls = require("./messenger/urls");
 const { route } = require("./utils/routeUtils.js");
 
-// messenger/<int id>/index.html
 const urls = [
     ...loginPageUrls,
     route("signup/", signupPageUrls), 

@@ -12,7 +12,7 @@ const httpServer = http.createServer(requestHandler).listen(8080);
 
 function requestHandler(httpReq, httpRes) {
     const url = urlUtils.parse(httpReq.url, true);
-    const queryFromUrl = url.query;
+    const httpQuery = url.query;
     
     const parsedUrl = parseUrl(url.pathname);
     if (parsedUrl.length > 1) parsedUrl.shift();
@@ -26,59 +26,21 @@ function requestHandler(httpReq, httpRes) {
         httpRes.end();
         return;
     }
-    
-    (async function () {
-        const buffers = [];
-        for await (const chunk of httpReq) {
-            buffers.push(chunk);
-        }
-        const rawData = Buffer.concat(buffers).toString();
-        return rawData === "" ? {} : JSON.parse(rawData);
-    })().then(queryFromBody => {
-        const cookies = parseCookies(httpReq);
-        const query = { url: queryFromUrl, body: queryFromBody, cookies };
 
-        let found = execute(parsedUrl, { httpQuery: query, httpRes });
+    let found = execute(parsedUrl, { httpQuery, httpReq, httpRes });
 
-        if (found) {
-            return;
-        }
-        fs.readFile("./404.html", function (err404, html404) {
-            if (!err404) {
-                httpRes.writeHead(404, { "Content-Type": "text/html" });
-                httpRes.write(html404);
-                httpRes.end();
-            } else {
-                throw err404;
-            }
-        });
-    });
-}
-
-function parseCookies(request) {
-    const list = {};
-    const cookieHeader = request.headers?.cookie;
-    if (!cookieHeader) return list;
-    
-    cookieHeader.split(`;`).forEach(function (cookie) {
-        let [name, ...rest] = cookie.split(`=`);
-        name = name?.trim();
-        if (!name) return;
-        const value = rest.join(`=`).trim();
-        if (!value) return;
-        list[name] = decodeURIComponent(value);
-    });
-    
-    return list;
-}
-
-async function readRequestBody(httpRequest) {
-    const buffers = [];
-    for await (const chunk of httpRequest) {
-        buffers.push(chunk);
+    if (found) {
+        return;
     }
-    const rawData = Buffer.concat(buffers).toString();
-    return rawData === "" ? {} : JSON.parse(rawData);
+    fs.readFile("./404.html", function (err404, html404) {
+        if (!err404) {
+            httpRes.writeHead(404, { "Content-Type": "text/html" });
+            httpRes.write(html404);
+            httpRes.end();
+        } else {
+            throw err404;
+        }
+    });
 }
 
 function execute(url, data) {

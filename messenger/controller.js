@@ -1,7 +1,11 @@
-const fs = require("fs");
+"use strict";
 
-module.exports.ServeHtml = function({ httpQuery, httpRes }) {
-    if (!httpQuery.cookies.userId || !httpQuery.cookies.username) {
+const fs = require("fs");
+const { parseCookies, readRequestBody } = require('../utils/httpUtils');
+
+module.exports.ServeHtml = function({ httpQuery, httpReq, httpRes }) {
+    const cookies = parseCookies(httpReq);
+    if (!cookies.userId || !cookies.username) {
         httpRes.writeHead(307, { Location: "/" });
         httpRes.end();
         return;
