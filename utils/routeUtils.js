@@ -1,10 +1,10 @@
 "use strict";
 
-module.exports.parseUrl = function(string) {
+function parseUrl(string) {
     return string.match(/[^\/]+\/?|\//g);
 }
 
-module.exports.route = function(url, next) {
+function route(url, next) {
     const parsedUrl = parseUrl(url).map(x => {
         const slashed = x[x.length - 1] === "/";
         if (x[0] === "<" && x[x.length - (slashed ? 2 : 1)] === ">" ) {
@@ -24,3 +24,6 @@ module.exports.route = function(url, next) {
     });
     return {token: parsedUrl, chain: next};
 }
+
+module.exports.route = route;
+module.exports.parseUrl = parseUrl;

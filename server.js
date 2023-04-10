@@ -2,11 +2,10 @@
 
 const http = require("http");
 const urlUtils = require("url");
-const fs = require("fs");
 const pathUrls = require("./urls");
 const { parseUrl } = require("./utils/routeUtils");
-const { v4: uuidv4 } = require('uuid');
-
+const { v4: uuidv4 } = require("uuid");
+const { serve404Page } = require("./utils/fileUtils");
 const PORT = 8080;
 
 const httpServer = http.createServer(requestHandler).listen(PORT);
@@ -36,15 +35,7 @@ function requestHandler(httpReq, httpRes) {
 
     if (found) return;
     
-    fs.readFile("./404.html", function (err404, html404) {
-        if (!err404) {
-            httpRes.writeHead(404, { "Content-Type": "text/html" });
-            httpRes.write(html404);
-            httpRes.end();
-        } else {
-            throw err404;
-        }
-    });
+    serve404Page(httpRes);
 }
 
 function execute(url, data) {
