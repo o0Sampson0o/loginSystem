@@ -12,7 +12,7 @@ const { readRequestBody } = require("../utils/httpUtils");
 const saltRounds = 10;
 const database = "messenger";
 const userTable = `${database}.user`;
-
+const userProfileTable = `${database}.userProfile`;
 module.exports.signup = function ({ httpReq, httpRes }) {
     readRequestBody(httpReq).then(body => {
         const username = sqlEscape(body.username);
@@ -20,23 +20,37 @@ module.exports.signup = function ({ httpReq, httpRes }) {
         bcrypt
             .genSalt(saltRounds)
             .then(salt => bcrypt.hash(password, salt))
-            .then(hashedPassword => {
-                const sql = `INSERT INTO ${userTable} (username, hashedPassword) VALUES ('${username}', '${hashedPassword}')`;
-                sqlConnection.query(sql, (sqlErr, sqlResult) => {
-                    if (!sqlErr) {
+            .then(async function (hashedPassword) {
+                let userId;
+                let userProfileId;
+                await sqlConnection
+                    .promise()
+                    .query(`INSERT INTO ${userTable} (username, hashedPassword) VALUES ('${username}', '${hashedPassword}')`)
+                    .then(sqlResult => {
                         httpRes.writeHead(200, { "Content-Type": "text/html" });
                         httpRes.write("success");
                         httpRes.end();
                         LOG(MODE.suc, `user '${username}' created`);
-                    } else if (sqlErr.code === "ER_DUP_ENTRY") {
-                        httpRes.writeHead(200, { "Content-Type": "text/html" });
-                        httpRes.write("username already exist");
-                        httpRes.end();
-                        LOG(MODE.war, `create error user '${username}' already exist`);
-                    } else {
-                        throw sqlErr;
-                    }
-                });
+                        userId = sqlResult[0].insertId;
+                    })
+                    .catch((err) => {
+                        if (err.code === "ER_DUP_ENTRY") {
+                            httpRes.writeHead(200, { "Content-Type": "text/html" });
+                            httpRes.write("username already exist");
+                            httpRes.end();
+                            LOG(MODE.war, `create error user '${username}' already exist`);
+                        } else {
+                            throw sqlErr;
+                        }
+                    });
+                    if (!userId) return;
+                await sqlConnection
+                    .promise()
+                    .query(`INSERT INTO ${userProfileTable} (displayName) VALUES ('${username}')`)
+                    .then(sqlResult => {
+                        userProfileId = sqlResult[0].insertId;
+                    });
+                sqlConnection.promise().query(`UPDATE ${userTable} SET userProfileId = ${userProfileId} WHERE userId = ${userId};`);
             })
             .catch(bCryptErr => {
                 throw bCryptErr;
