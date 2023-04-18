@@ -93,3 +93,27 @@ h2 {
     font-size: small;
     color: aqua;
 }
+
+#search-friend {
+    font-size: 0.8em;
+    width: 50vw;
+}
+
+#search-friend input {
+    background: white;
+    box-sizing: border-box;
+    padding: 5px 5px 5px 20px;
+    border: 1px solid black;
+    overflow: auto;
+    width: 50vw;
+    border-radius: 1rem;
+}
+#search-friend input:focus {
+    outline: none;
+}
+
+#friend-list {
+    max-height: 150px;
+    overflow-y: auto;
+    background: white;
+}

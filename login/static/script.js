@@ -38,7 +38,7 @@ function submitForm(event) {
         body: JSON.stringify(bodyData)
     })
         .then(httpResponse => {
-            if (!httpResponse.ok) throw new Error(`HTTP error, status = ${response.status}`);
+            if (!httpResponse.ok) throw new Error(`HTTP error, status = ${httpResponse.status}`);
             return httpResponse.text();
         })
         .then(text => {

@@ -33,7 +33,7 @@ function requestHandler(httpReq, httpRes) {
     const success = execute(parsedUrl, { httpQuery, httpReq, httpRes });
 
     if (success) return;
-
+    
     serve404Page(httpRes);
 }
 

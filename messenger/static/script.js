@@ -12,6 +12,8 @@ function notifySound() {
 
 let connectionSession = null;
 
+let latestSearchedName = "";
+let previousSearchTime = Date.now();
 const cookies = {};
 document.cookie
     .split(";")
@@ -28,6 +30,8 @@ const webSocket = new WebSocket(`ws://localhost:8080/ws/${cookies.userId}`, "ech
 function submitDirectMessage(e) {
     e.preventDefault();
 }
+
+
 
 function submitGlobalMessage(e) {
     e.preventDefault();
@@ -104,6 +108,40 @@ window.onload = () => {
             globalChatDisplayNotificationText.style.opacity = 0;
         }
     };
+
+
+    let myTimeout;
+    const searchFriend = document.querySelector("#search-friend input");
+    const search = function(e) {
+        if (Date.now() - previousSearchTime > 500) {
+            const name = searchFriend.value + (e?.key?.length === 1 ? e.key : '');
+            previousSearchTime = Date.now();
+            if (name.length === 0 || name === latestSearchedName) {
+                clearTimeout(myTimeout);
+                return;
+            }
+            clearTimeout(myTimeout);
+            myTimeout = setTimeout(search, 500);
+            latestSearchedName = name;
+            fetch(`/messenger/getFriend/${name}`, {
+                method: 'GET'
+            }).then(httpRes => {
+                if (!httpRes.ok) throw new Error(`HTTP error, status = ${httpRes.status}`);
+                return httpRes.text()
+            }).then(text => {
+                const friendListArray = JSON.parse(text).map(x => x.displayName);
+                const friendListEle = document.getElementById("friend-list");
+                friendListEle.innerHTML = "";
+                const friendEles = friendListArray.map(x => {
+                    const li = document.createElement('li');
+                    li.innerText = x;
+                    return li;
+                })
+                friendEles.forEach(x => friendListEle.appendChild(x));
+            })
+        }
+    };
+    searchFriend.onkeydown = search; 
 };
 
 webSocket.onmessage = event => {
@@ -118,6 +156,7 @@ webSocket.onmessage = event => {
     if (needsNotify) {
         notifySound();
     }
+
     if (globalChatDisplay.scrollTop < globalChatDisplay.scrollHeight - 800) {
         globalChatDisplay.classList.add("chat-display-new-notification");
         globalChatDisplayNotificationText.style.opacity = 1;
