@@ -7,15 +7,14 @@ class Notify {
         window.onfocus = () => {
             this.#needsNotificationSound = false;
         };
-    
+
         window.onblur = () => {
             this.#needsNotificationSound = true;
         };
     }
-    
-    init() {
-    }
-    
+
+    init() {}
+
     needsNotificationSound() {
         return this.#needsNotificationSound;
     }

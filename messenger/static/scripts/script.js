@@ -8,12 +8,12 @@ let connectionSession = null;
 
 const cookies = {};
 document.cookie
-.split(";")
-.map(x => ({
-    name: x.split("=")[0].trim(),
-    value: x.split("=")[1].trim()
-}))
-.forEach(x => (cookies[x.name] = x.value));
+    .split(";")
+    .map(x => ({
+        name: x.split("=")[0].trim(),
+        value: x.split("=")[1].trim()
+    }))
+    .forEach(x => (cookies[x.name] = x.value));
 
 const domain = "f6bd-2001-d08-d3-66ab-4c00-3954-6572-222b.ngrok-free.app";
 //const webSocket = new WebSocket(`wss://${domain}/ws/${cookies.userId}`, "echo-protocol");
@@ -27,22 +27,22 @@ window.onload = () => {
     const logoutButton = document.getElementById("logout-button");
     const globalChatElement = document.querySelector("#global-chat");
     const directChatElement = document.querySelector("#direct-chat");
-    
+
     logoutButton.onclick = () => {
         document.cookie = "userId=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;username=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         window.location.href = "/";
     };
-    
+
     globalChat.init(globalChatElement, webSocket);
     directChat.init(directChatElement, webSocket);
     directMessageForm.onsubmit = submitDirectMessage;
-    
+
     const shiftKeyUp = e => {
         if (e.key === "Shift") {
             shiftPressed = false;
         }
     };
-    
+
     directMessageBox.onkeydown = e => {
         if (e.key === "Shift") {
             shiftPressed = true;
@@ -51,12 +51,12 @@ window.onload = () => {
             submitDirectMessage(e);
         }
     };
-    
+
     directMessageBox.onkeyup = shiftKeyUp;
-    
+
     const friendSearchBar = document.querySelector("#search-friend input");
     const friendList = document.getElementById("friend-list");
-    
+
     friendSearcher.init(friendSearchBar, friendList);
 };
 
@@ -72,9 +72,9 @@ webSocket.onmessage = event => {
     }
 
     if (isGlobal) {
-        globalChat.appendMessage({sender, message});
-    }else {
-        directChat.appendMessage({sender, message});
+        globalChat.appendMessage({ sender, message });
+    } else {
+        directChat.appendMessage({ sender, message });
     }
 };
 
