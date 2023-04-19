@@ -38,7 +38,7 @@ class MessageBox {
                 this.#isShiftPressed = true;
             }
             if (!this.#isShiftPressed && e.key === "Enter") {
-                this.#sendMessage();
+                this.#sendMessage(e);
             }
         };
 
