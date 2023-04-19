@@ -2,12 +2,8 @@ class Notify {
     #needsNotificationSound;
     #notificationSound;
     constructor(path) {
-        this.init(path);
-    }
-    
-    init(path) {
-        this.#needsNotificationSound = true;
         this.#notificationSound = new Audio(path);
+        this.#needsNotificationSound = false;
         window.onfocus = () => {
             this.#needsNotificationSound = false;
         };
@@ -16,6 +12,10 @@ class Notify {
             this.#needsNotificationSound = true;
         };
     }
+    
+    init() {
+    }
+    
     needsNotificationSound() {
         return this.#needsNotificationSound;
     }

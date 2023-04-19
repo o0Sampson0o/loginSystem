@@ -7,24 +7,22 @@ class MessageBox {
     #notificationText;
     #socket;
     #isShiftPressed;
-    constructor() {
+    #isGlobal;
+    constructor(isGlobal, webSocket) {
+        this.#isGlobal = isGlobal;
         this.#isShiftPressed = false;
+        this.#socket = webSocket;
     }
-    init(chatBox, webSocket) {
+    init(chatBox) {
         const chatBoxElements = Array.from(chatBox.children);
         const inputForm = chatBoxElements.find(x => x.classList.contains("input-form"));
         const inputFormElements = Array.from(inputForm.children);
 
-        this.#socket = webSocket;
-
         this.#chatBox = chatBox;
-
         this.#chatDisplay = chatBoxElements.find(x => x.classList.contains("chat-display"));
-
         this.#inputForm = inputForm;
         this.#chatInputArea = inputFormElements.find(x => x.classList.contains("message-box"));
         this.#chatSubmitButton = inputFormElements.find(x => x.tagName === "INPUT");
-
         this.#notificationText = chatBoxElements.find(x => x.classList.contains("new-notification"));
 
         this.#chatDisplay.onscroll = () => {
@@ -57,7 +55,7 @@ class MessageBox {
         if (message === "") {
             return;
         }
-        this.#socket.send(JSON.stringify({ sessionId: connectionSession, global: true, message }));
+        this.#socket.send(JSON.stringify({ sessionId: connectionSession, global: this.#isGlobal, message }));
         this.#chatInputArea.innerText = "";
     }
 
