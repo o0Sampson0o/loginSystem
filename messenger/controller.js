@@ -29,8 +29,6 @@ module.exports.findFriend = function ({ httpReq, httpRes, name }) {
     sqlConnection.query(`SELECT displayName, userProfileId FROM ${userProfileTable} WHERE displayName LIKE '%${name}%'`, (sqlErr, sqlResult) => {
         httpRes.writeHead(200, { "Content-Type": "application/json" });
         httpRes.write(JSON.stringify(sqlResult));
-        console.log(name);
-        console.log(sqlResult);
         httpRes.end();
     });
 };

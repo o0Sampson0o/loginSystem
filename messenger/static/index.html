@@ -3,7 +3,10 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <script src="./static/script.js"></script>
+        <script src="./static/scripts/notification.js"></script>
+        <script src="./static/scripts/friendSearcher.js"></script>
+        <script src="./static/scripts/messageBox.js"></script>
+        <script src="./static/scripts/script.js"></script>
         <link rel="stylesheet" href="./static/style.css" />
         <title>Messenger</title>
     </head>
@@ -12,19 +15,13 @@
         <div id="search-friend">
             <input type="text" name="search-friend">
             <ul id="friend-list">
-                <li>
-                    asdasd
-                </li>
-                <li>
-                    dsds
-                </li>
             </ul>
         </div>
         <div id="chat-section">
             <div id="global-chat">
                 <h2>GLOBAL CHAT</h2>
                 <p class="new-notification">new notification</p>
-                <div class="chat-display" id="global-chat-display"></div>
+                <div class="chat-display"></div>
                 <form class="input-form">
                     <div id="direct-chat-message-box" class="message-box" contenteditable></div>
                     <input type="submit" value="send" />
@@ -33,7 +30,7 @@
             <div id="direct-chat">
                 <h2>DIRECT CHAT</h2>
                 <p class="new-notification">new notification</p>
-                <div class="chat-display" id="direct-chat-display">
+                <div class="chat-display">
                     <div class="message">[CURRENT UNAVAILABLE]</div>
                 </div>
                 <form class="input-form">
