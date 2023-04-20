@@ -7,6 +7,7 @@ const { serve404Page, serveStaticFileFor } = require("../utils/fileUtils.js");
 const database = "messenger";
 const userTable = `${database}.user`;
 const userProfileTable = `${database}.userProfile`;
+
 module.exports.ServeHtml = function ({ httpReq, httpRes }) {
     const cookies = parseCookies(httpReq);
     if (!cookies.userId || !cookies.username) {

@@ -46,7 +46,6 @@ function submitForm(event) {
                 username.classList.add("error");
                 usernameErrorMessage.innerText = text;
             } else {
-                //alert(text);
                 window.location.href = "/messenger/";
             }
         })
