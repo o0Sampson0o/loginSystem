@@ -15,6 +15,10 @@ class FriendSearcher {
         this.#searchbar.onkeydown = this.#search.bind(this);
     }
 
+    #clearSearch() {
+        this.#list.innerHTML = "";
+    }
+
     #search(e) {
         if (Date.now() - this.#previousSearchTime > 500) {
             const name = this.#searchbar.value + (e?.key?.length === 1 ? e.key : "");
@@ -37,11 +41,15 @@ class FriendSearcher {
                     return httpRes.text();
                 })
                 .then(text => {
-                    const friends = JSON.parse(text).map(x => x.displayName);
-                    this.#list.innerHTML = "";
+                    const friends = JSON.parse(text);
+                    this.#clearSearch();
                     const friendElements = friends.map(x => {
                         const li = document.createElement("li");
-                        li.innerText = x;
+                        li.innerText = `${x.displayName}#${x.userProfileId}`;
+                        li.onclick = () => {
+                            this.#clearSearch();
+                            chatTo(x.userProfileId);
+                        }
                         return li;
                     });
                     friendElements.forEach(x => this.#list.appendChild(x));

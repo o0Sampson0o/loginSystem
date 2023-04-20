@@ -35,7 +35,9 @@ function navigateFrom(headNode) {
             const currentVars_ = { ...currentVars };
             let match = true;
 
-            if (currentUrl.length < token.length) continue;
+            if (currentUrl.length < token.length)  {
+                continue;
+            }
 
             for (let i = 0; i < token.length; i++) {
                 if (!token[i].dynamic) {

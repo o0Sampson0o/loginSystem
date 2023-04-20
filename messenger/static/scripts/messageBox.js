@@ -8,6 +8,7 @@ class MessageBox {
     #socket;
     #isShiftPressed;
     #isGlobal;
+    #receiverId
     constructor(isGlobal, webSocket) {
         this.#isGlobal = isGlobal;
         this.#isShiftPressed = false;
@@ -49,14 +50,22 @@ class MessageBox {
         this.#inputForm.onsubmit = this.#sendMessage.bind(this);
     }
 
+    setReceiver(id) {
+        this.#receiverId = id;
+    }
+
     #sendMessage(e) {
         e.preventDefault();
         const message = this.#chatInputArea.innerText.trimEnd();
         if (message === "") {
             return;
         }
-        this.#socket.send(JSON.stringify({ sessionId: connectionSession, global: this.#isGlobal, message }));
+        this.#socket.send(JSON.stringify({ sessionId: connectionSession, isGlobal: this.#isGlobal, message, to: this.#receiverId }));
         this.#chatInputArea.innerText = "";
+    }
+
+    clearMessage() {
+        this.#chatDisplay.innerHTML = "";
     }
 
     appendMessage(messageObject) {

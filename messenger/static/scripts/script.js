@@ -5,6 +5,7 @@ let shiftPressed = false;
 const notification = new Notify("./static/audio/notification.mp3");
 const friendSearcher = new FriendSearcher();
 let connectionSession = null;
+let chattingId = 0;
 
 const cookies = {};
 document.cookie
@@ -21,17 +22,25 @@ const webSocket = new WebSocket(`ws://localhost:8080/ws/${cookies.userId}`, "ech
 
 const globalChat = new MessageBox(true, webSocket);
 const directChat = new MessageBox(false, webSocket);
+
+function chatTo(id) {
+    if (chattingId == id) return;
+    chattingId = id;
+    directChat.setReceiver(id);
+    directChat.clearMessage();
+}
+
 window.onload = () => {
     const logoutButton = document.getElementById("logout-button");
-    
+
     const globalChatElement = document.querySelector("#global-chat");
     const directChatElement = document.querySelector("#direct-chat");
-    
+
     const friendSearchBar = document.querySelector("#search-friend input");
     const friendList = document.getElementById("friend-list");
 
     logoutButton.onclick = () => {
-        document.cookie = "userId=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;username=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = `userId=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;username=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         window.location.href = "/";
     };
 
@@ -42,7 +51,7 @@ window.onload = () => {
 };
 
 webSocket.onmessage = event => {
-    const { uuid, message, sender, isGlobal } = JSON.parse(event.data);
+    const { uuid, message, sender, senderId, isGlobal } = JSON.parse(event.data);
 
     if (uuid) {
         connectionSession = uuid;
@@ -55,7 +64,9 @@ webSocket.onmessage = event => {
     if (isGlobal) {
         globalChat.appendMessage({ sender, message });
     } else {
-        directChat.appendMessage({ sender, message });
+        if (+senderId === +chattingId || +senderId === +cookies.userId) {
+            directChat.appendMessage({ sender, message });
+        }
     }
 };
 

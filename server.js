@@ -14,7 +14,6 @@ const navigate = navigateFrom(routeHeadNode);
 const httpServer = httpUtils.createServer(requestHandler).listen(PORT);
 
 function requestHandler(httpReq, httpRes) {
-    
     // TODO: THINK ABOUT CORS;
     if (httpReq.method === "OPTIONS") {
         httpRes.setHeader("Access-Control-Allow-Origin", "*");
@@ -37,7 +36,6 @@ function requestHandler(httpReq, httpRes) {
     if (!isExecuteSuccess) {
         serve404Page(httpRes);
     }
-
 }
 
 // * --------------------------------------------------        END HTTP SERVER       --------------------------------------------------
@@ -53,6 +51,7 @@ const wsServer = new WebSocketServer({
 });
 
 const clients = {};
+const userIdToUUIDMapper = {};
 let clientsCount = 0;
 wsServer.on("request", request => {
     const route = parseToRoute(request.resourceURL.pathname);
@@ -73,6 +72,7 @@ wsServer.on("request", request => {
     const uuid = uuidv4();
     clientsCount++;
     clients[uuid] = { username, userId, connection };
+    userIdToUUIDMapper[+userId] = (userIdToUUIDMapper[+userId] || []).concat(uuid);
     connection.send(JSON.stringify({ uuid }));
     connection.on("message", data => {
         if (data.type === "utf8") {
@@ -80,10 +80,43 @@ wsServer.on("request", request => {
                 return;
             }
             const message = JSON.parse(data.utf8Data);
-            for (const clientSessionId in clients) {
-                clients[clientSessionId].connection.sendUTF(
-                    JSON.stringify({ sender: clients[message.sessionId].username, message: message.message })
-                );
+            if (message.isGlobal) {
+                for (const clientSessionId in clients) {
+                    clients[clientSessionId].connection.sendUTF(
+                        JSON.stringify({
+                            sender: clients[message.sessionId].username,
+                            senderId: clients[message.sessionId].userId,
+                            message: message.message,
+                            isGlobal: true
+                        })
+                    );
+                }
+            } else {
+                const senderId = clients[message.sessionId].userId;
+                console.log(+senderId, +message.to);
+                userIdToUUIDMapper[+message.to].forEach(uuid => {
+                    clients[uuid].connection.sendUTF(
+                        JSON.stringify({
+                            sender: clients[message.sessionId].username,
+                            senderId: clients[message.sessionId].userId,
+                            message: message.message,
+                            isGlobal: false
+                        })
+                    );
+                })
+                if (+message.to === +senderId) {
+                    return;
+                }
+                userIdToUUIDMapper[+senderId].forEach(uuid => {
+                    clients[uuid].connection.sendUTF(
+                        JSON.stringify({
+                            sender: clients[message.sessionId].username,
+                            senderId: clients[message.sessionId].userId,
+                            message: message.message,
+                            isGlobal: false
+                        })
+                    );
+                })
             }
         } else if (data.type === "binary") {
             console.log("Received Binary Message of " + data.binaryData.length + " bytes");

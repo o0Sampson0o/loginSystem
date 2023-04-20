@@ -46,11 +46,8 @@ module.exports.signup = function ({ httpReq, httpRes }) {
                     if (!userId) return;
                 await sqlConnection
                     .promise()
-                    .query(`INSERT INTO ${userProfileTable} (displayName) VALUES ('${username}')`)
-                    .then(sqlResult => {
-                        userProfileId = sqlResult[0].insertId;
-                    });
-                sqlConnection.promise().query(`UPDATE ${userTable} SET userProfileId = ${userProfileId} WHERE userId = ${userId};`);
+                    .query(`INSERT INTO ${userProfileTable} (userProfileId, displayName) VALUES (${userId}, '${username}')`);
+                sqlConnection.promise().query(`UPDATE ${userTable} SET userProfileId = ${userId} WHERE userId = ${userId};`);
             })
             .catch(bCryptErr => {
                 throw bCryptErr;
