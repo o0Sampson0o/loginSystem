@@ -13,8 +13,6 @@ class Notify {
         };
     }
 
-    init() {}
-
     needsNotificationSound() {
         return this.#needsNotificationSound;
     }

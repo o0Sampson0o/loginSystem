@@ -1,25 +1,21 @@
 "use strict";
 
-const http = require("http");
+const httpUtils = require("http");
 const urlUtils = require("url");
-const pathUrls = require("./urls");
-const { parseUrl, executeFrom } = require("./utils/routeUtils");
+const routeHeadNode = require("./urls");
+const { parseToRoute, navigateFrom } = require("./utils/routeUtils");
 const { serve404Page } = require("./utils/fileUtils");
 const PORT = 8080;
 
-const execute = executeFrom(pathUrls);
+const navigate = navigateFrom(routeHeadNode);
 
 // * --------------------------------------------------          HTTP SERVER         --------------------------------------------------
 
-const httpServer = http.createServer(requestHandler).listen(PORT);
+const httpServer = httpUtils.createServer(requestHandler).listen(PORT);
 
 function requestHandler(httpReq, httpRes) {
-    const url = urlUtils.parse(httpReq.url, true);
-    const httpQuery = url.query;
-
-    const parsedUrl = parseUrl(url.pathname);
-    if (parsedUrl.length > 1) parsedUrl.shift();
-
+    
+    // TODO: THINK ABOUT CORS;
     if (httpReq.method === "OPTIONS") {
         httpRes.setHeader("Access-Control-Allow-Origin", "*");
         httpRes.setHeader("Access-Control-Request-Method", "*");
@@ -30,11 +26,18 @@ function requestHandler(httpReq, httpRes) {
         return;
     }
 
-    const success = execute(parsedUrl, { httpQuery, httpReq, httpRes });
+    const httpReqUrl = urlUtils.parse(httpReq.url, true);
+    const httpQuery = httpReqUrl.query;
 
-    if (success) return;
-    
-    serve404Page(httpRes);
+    const route = parseToRoute(httpReqUrl.pathname);
+    if (route.length > 1) route.shift();
+
+    const isExecuteSuccess = navigate(route, { httpQuery, httpReq, httpRes });
+
+    if (!isExecuteSuccess) {
+        serve404Page(httpRes);
+    }
+
 }
 
 // * --------------------------------------------------        END HTTP SERVER       --------------------------------------------------
@@ -52,12 +55,12 @@ const wsServer = new WebSocketServer({
 const clients = {};
 let clientsCount = 0;
 wsServer.on("request", request => {
-    const parsedUrl = parseUrl(request.resourceURL.pathname);
-    if (parsedUrl.length > 1) {
-        parsedUrl.shift();
+    const route = parseToRoute(request.resourceURL.pathname);
+    if (route.length > 1) {
+        route.shift();
     }
 
-    if (parsedUrl[0] !== "ws/" && parsedUrl[0] !== "ws") {
+    if (route[0] !== "ws/" && route[0] !== "ws") {
         request.reject();
         return;
     }

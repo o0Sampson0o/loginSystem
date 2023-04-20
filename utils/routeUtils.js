@@ -1,11 +1,11 @@
 "use strict";
 
-function parseUrl(string) {
+function parseToRoute(string) {
     return string.match(/[^\/]+\/?|\//g);
 }
 
-function route(url, next) {
-    const parsedUrl = parseUrl(url).map(x => {
+function routeNode(url, next) {
+    const parsedUrl = parseToRoute(url).map(x => {
         const slashed = x[x.length - 1] === "/";
         if (x[0] === "<" && x[x.length - (slashed ? 2 : 1)] === ">") {
             const [type, name] = x.substr(1, x.length - (slashed ? 3 : 2)).split(" ");
@@ -25,7 +25,7 @@ function route(url, next) {
     return { token: parsedUrl, chain: next };
 }
 
-function executeFrom(headNode) {
+function navigateFrom(headNode) {
     return function (url, data) {
         const stack = [...headNode.map(x => ({ ...x, currentUrl: [...url], currentVars: {} }))];
         let found = false;
@@ -76,6 +76,6 @@ function executeFrom(headNode) {
     };
 }
 
-module.exports.route = route;
-module.exports.parseUrl = parseUrl;
-module.exports.executeFrom = executeFrom;
+module.exports.routeNode = routeNode;
+module.exports.parseToRoute = parseToRoute;
+module.exports.navigateFrom = navigateFrom;

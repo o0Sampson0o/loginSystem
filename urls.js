@@ -3,13 +3,13 @@
 const loginPageUrls = require("./login/urls");
 const signupPageUrls = require("./signup/urls");
 const messengerPageUrls = require("./messenger/urls");
-const { route } = require("./utils/routeUtils.js");
+const { routeNode } = require("./utils/routeUtils.js");
 
 const urls = [
     ...loginPageUrls,
-    route("signup/", signupPageUrls),
-    route("login/", loginPageUrls),
-    route("messenger/", messengerPageUrls)
+    routeNode("signup/", signupPageUrls),
+    routeNode("login/", loginPageUrls),
+    routeNode("messenger/", messengerPageUrls)
 ];
 
 urls.reverse();

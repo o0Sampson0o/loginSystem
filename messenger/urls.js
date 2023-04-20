@@ -1,13 +1,13 @@
 "use strict";
 
 const { ServeHtml, serveStaticFile, findFriend } = require("./controller.js");
-const { route } = require("../utils/routeUtils.js");
+const { routeNode } = require("../utils/routeUtils.js");
 
 const urls = [
-    route("/", ServeHtml),
-    route("static/<str fileName>", serveStaticFile),
-    route("static/<str subFolderName>/<str fileName>", serveStaticFile),
-    route("getFriend/<str name>", findFriend)
+    routeNode("/", ServeHtml),
+    routeNode("static/<str fileName>", serveStaticFile),
+    routeNode("static/<str subFolderName>/<str fileName>", serveStaticFile),
+    routeNode("getFriend/<str name>", findFriend)
 ];
 
 urls.reverse();

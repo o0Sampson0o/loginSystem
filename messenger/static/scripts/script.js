@@ -2,7 +2,7 @@
 
 let shiftPressed = false;
 
-const notification = new Notify();
+const notification = new Notify("./static/audio/notification.mp3");
 const friendSearcher = new FriendSearcher();
 let connectionSession = null;
 
@@ -22,11 +22,13 @@ const webSocket = new WebSocket(`ws://localhost:8080/ws/${cookies.userId}`, "ech
 const globalChat = new MessageBox(true, webSocket);
 const directChat = new MessageBox(false, webSocket);
 window.onload = () => {
-    notification.init("./static/audio/notification.mp3");
-
     const logoutButton = document.getElementById("logout-button");
+    
     const globalChatElement = document.querySelector("#global-chat");
     const directChatElement = document.querySelector("#direct-chat");
+    
+    const friendSearchBar = document.querySelector("#search-friend input");
+    const friendList = document.getElementById("friend-list");
 
     logoutButton.onclick = () => {
         document.cookie = "userId=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;username=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -35,27 +37,6 @@ window.onload = () => {
 
     globalChat.init(globalChatElement, webSocket);
     directChat.init(directChatElement, webSocket);
-    directMessageForm.onsubmit = submitDirectMessage;
-
-    const shiftKeyUp = e => {
-        if (e.key === "Shift") {
-            shiftPressed = false;
-        }
-    };
-
-    directMessageBox.onkeydown = e => {
-        if (e.key === "Shift") {
-            shiftPressed = true;
-        }
-        if (!shiftPressed && e.key === "Enter") {
-            submitDirectMessage(e);
-        }
-    };
-
-    directMessageBox.onkeyup = shiftKeyUp;
-
-    const friendSearchBar = document.querySelector("#search-friend input");
-    const friendList = document.getElementById("friend-list");
 
     friendSearcher.init(friendSearchBar, friendList);
 };
