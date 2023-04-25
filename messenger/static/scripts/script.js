@@ -1,7 +1,5 @@
 "use strict";
 
-let shiftPressed = false;
-
 const notification = new Notify("./static/audio/notification.mp3");
 const friendSearcher = new FriendSearcher();
 let connectionSession = null;
@@ -16,9 +14,9 @@ document.cookie
     }))
     .forEach(x => (cookies[x.name] = x.value));
 
-const domain = "f6bd-2001-d08-d3-66ab-4c00-3954-6572-222b.ngrok-free.app";
-//const webSocket = new WebSocket(`wss://${domain}/ws/${cookies.userId}`, "echo-protocol");
-const webSocket = new WebSocket(`ws://localhost:8080/ws/${cookies.userId}`, "echo-protocol");
+const domain = "f18b-2001-d08-d3-66ab-a4c1-cf41-3f43-8a5f.ngrok-free.app";
+const webSocket = new WebSocket(`wss://${domain}/ws/${cookies.userId}`, "echo-protocol");
+//const webSocket = new WebSocket(`ws://localhost:8080/ws/${cookies.userId}`, "echo-protocol");
 
 const globalChat = new MessageBox(true, webSocket);
 const directChat = new MessageBox(false, webSocket);

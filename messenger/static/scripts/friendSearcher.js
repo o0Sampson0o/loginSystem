@@ -49,7 +49,7 @@ class FriendSearcher {
                         li.onclick = () => {
                             this.#clearSearch();
                             chatTo(x.userProfileId);
-                        }
+                        };
                         return li;
                     });
                     friendElements.forEach(x => this.#list.appendChild(x));

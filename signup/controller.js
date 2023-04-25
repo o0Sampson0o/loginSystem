@@ -22,7 +22,6 @@ module.exports.signup = function ({ httpReq, httpRes }) {
             .then(salt => bcrypt.hash(password, salt))
             .then(async function (hashedPassword) {
                 let userId;
-                let userProfileId;
                 await sqlConnection
                     .promise()
                     .query(`INSERT INTO ${userTable} (username, hashedPassword) VALUES ('${username}', '${hashedPassword}')`)
@@ -33,7 +32,7 @@ module.exports.signup = function ({ httpReq, httpRes }) {
                         LOG(MODE.suc, `user '${username}' created`);
                         userId = sqlResult[0].insertId;
                     })
-                    .catch((err) => {
+                    .catch(err => {
                         if (err.code === "ER_DUP_ENTRY") {
                             httpRes.writeHead(200, { "Content-Type": "text/html" });
                             httpRes.write("username already exist");
@@ -43,10 +42,8 @@ module.exports.signup = function ({ httpReq, httpRes }) {
                             throw sqlErr;
                         }
                     });
-                    if (!userId) return;
-                await sqlConnection
-                    .promise()
-                    .query(`INSERT INTO ${userProfileTable} (userProfileId, displayName) VALUES (${userId}, '${username}')`);
+                if (!userId) return;
+                await sqlConnection.promise().query(`INSERT INTO ${userProfileTable} (userProfileId, displayName) VALUES (${userId}, '${username}')`);
                 sqlConnection.promise().query(`UPDATE ${userTable} SET userProfileId = ${userId} WHERE userId = ${userId};`);
             })
             .catch(bCryptErr => {

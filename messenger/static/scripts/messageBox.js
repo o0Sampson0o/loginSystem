@@ -8,7 +8,7 @@ class MessageBox {
     #socket;
     #isShiftPressed;
     #isGlobal;
-    #receiverId
+    #receiverId;
     constructor(isGlobal, webSocket) {
         this.#isGlobal = isGlobal;
         this.#isShiftPressed = false;

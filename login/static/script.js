@@ -1,31 +1,52 @@
 "use strict";
 
-function submitForm(event) {
+const statusToMsgMapper = {
+    OK: "ok",
+    PASS_EMPTY: "password cannot be empty",
+    USERNAME_EMPTY: "username cannot be empty"
+};
+
+function handleLogin(event) {
     event.preventDefault();
+
+    let isOk = true;
+    let validationMessage = "";
+
     const username = document.getElementById("username");
     const password = document.getElementById("password");
     const usernameErrorMessage = document.getElementById("username-error-message");
     const passwordErrorMessage = document.getElementById("password-error-message");
-    const bodyData = { username: username.value, password: password.value };
-    let validationMessage;
-    validationMessage = validateUsername(username.value);
-    let isOk = true;
+
+    const bodyData = {
+        username: username.value,
+        password: password.value
+    };
+
     username.classList.remove("error");
     password.classList.remove("error");
+
     usernameErrorMessage.innerText = "";
     passwordErrorMessage.innerText = "";
-    if (validationMessage !== "ok") {
+
+    validationMessage = validateUsername(username.value);
+
+    if (validationMessage !== statusToMsgMapper.OK) {
         username.classList.add("error");
         usernameErrorMessage.innerText = validationMessage;
         isOk = false;
     }
+
     validationMessage = validatePassword(password.value);
-    if (validationMessage !== "ok") {
+
+    if (validationMessage !== statusToMsgMapper.OK) {
         password.classList.add("error");
         passwordErrorMessage.innerText = validationMessage;
         isOk = false;
     }
-    if (!isOk) return;
+
+    if (!isOk) {
+        return;
+    }
 
     fetch(`/login/api`, {
         method: "POST",
@@ -55,20 +76,20 @@ function submitForm(event) {
 }
 
 window.onload = () => {
-    const form = document.getElementById("form");
-    form.onsubmit = submitForm;
+    const loginForm = document.getElementById("form");
+    loginForm.onsubmit = handleLogin;
 };
 
 function validateUsername(username) {
     if (username.length === 0) {
-        return "username cannot be empty";
+        return statusToMsgMapper.USERNAME_EMPTY;
     }
-    return "ok";
+    return statusToMsgMapper.OK;
 }
 
 function validatePassword(password) {
     if (password.length === 0) {
-        return "password cannot be empty";
+        return statusToMsgMapper.PASS_EMPTY;
     }
-    return "ok";
+    return statusToMsgMapper.OK;
 }

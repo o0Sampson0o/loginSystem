@@ -18,6 +18,7 @@ function LOG(mode, string) {
     dateString = dateString[3] + "/" + dateString[1] + "/" + dateString[2];
     if (mode === MODE.msg) {
         console.log(white);
+
     } else if (mode === MODE.suc) {
         console.log(green);
     } else if (mode === MODE.war) {
