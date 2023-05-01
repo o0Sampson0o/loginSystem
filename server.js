@@ -1,12 +1,13 @@
 "use strict";
 
+require("./sqlConnection").connect();
+require("./mongoConnection").connect();
 const httpUtils = require("http");
 const urlUtils = require("url");
 const routeHeadNode = require("./urls");
 const { parseToRoute, navigateFrom } = require("./utils/routeUtils");
 const { serve404Page } = require("./utils/fileUtils");
 const PORT = 8080;
-
 const navigate = navigateFrom(routeHeadNode);
 
 // * --------------------------------------------------          HTTP SERVER         --------------------------------------------------
@@ -44,6 +45,7 @@ function requestHandler(httpReq, httpRes) {
 
 const WebSocketServer = require("websocket").server;
 const { v4: uuidv4 } = require("uuid");
+const dateUtils = require("date-and-time");
 
 const wsServer = new WebSocketServer({
     httpServer: httpServer,
@@ -80,6 +82,7 @@ wsServer.on("request", request => {
                 return;
             }
             const message = JSON.parse(data.utf8Data);
+
             if (message.isGlobal) {
                 for (const clientSessionId in clients) {
                     clients[clientSessionId].connection.sendUTF(
@@ -93,8 +96,59 @@ wsServer.on("request", request => {
                 }
             } else {
                 const senderId = clients[message.sessionId].userId;
-                console.log(+senderId, +message.to);
-                userIdToUUIDMapper[+message.to].forEach(uuid => {
+                const mongoDbConnection = require("./mongoConnection").getConnection();
+                mongoDbConnection
+                    .collection("Messages")
+                    .findOne({ between: [+senderId, +message.to].sort() })
+                    .then(x => {
+                        const currentTime = new Date();
+                        if (x === null) {
+                            const messageItem = {
+                                between: [+senderId, +message.to],
+                                [dateUtils.format(currentTime, "DD-MM-YYYY HH")]: [
+                                    {
+                                        sender: +senderId,
+                                        time: `${dateUtils.format(currentTime, "mm:ss:SSS")}`,
+                                        message: message.message
+                                    }
+                                ]
+                            };
+                            mongoDbConnection.collection("Messages").insertOne(messageItem);
+                        } else {
+                            const o_id = x._id;
+
+                            const chunk = x[`${dateUtils.format(currentTime, "DD-MM-YYYY HH")}`];
+                            if (chunk) {
+                                mongoDbConnection.collection("Messages").updateOne(
+                                    { _id: o_id },
+                                    {
+                                        $push: {
+                                            [dateUtils.format(currentTime, "DD-MM-YYYY HH")]: {
+                                                sender: +senderId,
+                                                time: `${dateUtils.format(currentTime, "mm:ss:SSS")}`,
+                                                message: message.message
+                                            }
+                                        }
+                                    }
+                                );
+                            } else {
+                                mongoDbConnection.collection("Messages").updateOne(
+                                    { _id: o_id },
+                                    {
+                                        $set: {
+                                            [dateUtils.format(currentTime, "DD-MM-YYYY HH")]: {
+                                                sender: +senderId,
+                                                time: `${dateUtils.format(currentTime, "mm:ss:SSS")}`,
+                                                message: message.message
+                                            }
+                                        }
+                                    }
+                                );
+                            }
+                        }
+                    });
+
+                userIdToUUIDMapper[+message.to]?.forEach(uuid => {
                     clients[uuid].connection.sendUTF(
                         JSON.stringify({
                             sender: clients[message.sessionId].username,
@@ -103,11 +157,11 @@ wsServer.on("request", request => {
                             isGlobal: false
                         })
                     );
-                })
+                });
                 if (+message.to === +senderId) {
                     return;
                 }
-                userIdToUUIDMapper[+senderId].forEach(uuid => {
+                userIdToUUIDMapper[+senderId]?.forEach(uuid => {
                     clients[uuid].connection.sendUTF(
                         JSON.stringify({
                             sender: clients[message.sessionId].username,
@@ -116,7 +170,7 @@ wsServer.on("request", request => {
                             isGlobal: false
                         })
                     );
-                })
+                });
             }
         } else if (data.type === "binary") {
             console.log("Received Binary Message of " + data.binaryData.length + " bytes");

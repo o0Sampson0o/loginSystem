@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const fs = require("fs");
 const { serve404Page, serveStaticFileFor } = require("../utils/fileUtils.js");
 const { LOG, MODE } = require("../logger.js");
-const sqlConnection = require("../sqlConnection.js");
+const sqlConnection = require("../sqlConnection.js").getConnection();
 const { sqlEscape } = require("../utils/sqlUtils.js");
 
 const database = "messenger";

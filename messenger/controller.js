@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 const { parseCookies } = require("../utils/httpUtils.js");
-const sqlConnection = require("../sqlConnection.js");
+const sqlConnection = require("../sqlConnection.js").getConnection();
 const { serve404Page, serveStaticFileFor } = require("../utils/fileUtils.js");
 const database = "messenger";
 const userTable = `${database}.user`;
